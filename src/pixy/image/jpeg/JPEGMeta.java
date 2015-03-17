@@ -480,8 +480,6 @@ public class JPEGMeta {
 				
 		// The very first marker should be the start_of_image marker!	
 		if(Marker.fromShort(IOUtils.readShortMM(is)) != Marker.SOI)	{
-			is.close();
-			os.close();
 			throw new IOException("Invalid JPEG image, expected SOI marker not found!");
 		}
 		
@@ -901,11 +899,11 @@ public class JPEGMeta {
 		int length = 0;	
 		short marker;
 		Marker emarker;
+		int app0Index = -1;
+		int exifIndex = -1;
 		
 		// The very first marker should be the start_of_image marker!	
 		if(Marker.fromShort(IOUtils.readShortMM(is)) != Marker.SOI)	{
-			is.close();
-			os.close();		
 			throw new IOException("Invalid JPEG image, expected SOI marker not found!");
 		}
 		
@@ -913,65 +911,64 @@ public class JPEGMeta {
 		
 		marker = IOUtils.readShortMM(is);
 		
-		while (!finished)
-	    {	        
-			if (Marker.fromShort(marker) == Marker.EOI)	{
-				IOUtils.writeShortMM(os, Marker.EOI.getValue());
-				finished = true;
+		// Create a list to hold the temporary Segments 
+		List<Segment> segments = new ArrayList<Segment>();
+		
+		while (!finished) {	        
+			if (Marker.fromShort(marker) == Marker.SOS)	{
+				int index = Math.max(app0Index, exifIndex);
+				// Write the items in segments list excluding the old XMP
+				for(int i = 0; i <= index; i++)
+					segments.get(i).write(os);				
+				// Now we insert the XMP data
+				writeXMP(os, xmp, extendedXmp, guid);
+				// Copy the remaining segments
+				for(int i = (index < 0 ? 0 : index + 1); i < segments.size(); i++) {
+					segments.get(i).write(os);
+				}	
+				// Copy the leftover stuff
+				IOUtils.writeShortMM(os, marker);
+				copyToEnd(is, os); // Copy the rest of the data
+				finished = true; // No more marker to read, we are done.				
 			} else { // Read markers
 				emarker = Marker.fromShort(marker);
-	
+				
 				switch (emarker) {
 					case JPG: // JPG and JPGn shouldn't appear in the image.
 					case JPG0:
 					case JPG13:
-				    case TEM: // The only stand alone marker besides SOI, EOI, and RSTn. 
-						IOUtils.writeShortMM(os, marker);
-				    	marker = IOUtils.readShortMM(is);
-						break;
-				    case PADDING:	
-				    	IOUtils.writeShortMM(os, marker);
-				    	int nextByte = 0;
-				    	while((nextByte = IOUtils.read(is)) == 0xff) {
-				    		IOUtils.write(os, nextByte);
-				    	}
-				    	marker = (short)((0xff<<8)|nextByte);
-				    	break;
-				    case SOS:
-				    	// We add XMP APP1 data right before the SOS segment.
-				     	writeXMP(os, xmp, extendedXmp, guid);						   
-				    	//Copy sos
-				    	IOUtils.writeShortMM(os, marker);
-						copyToEnd(is, os); // Copy the rest of the data
-						finished = true; // No more marker to read, we are done. 
+				    case TEM: // The only stand alone marker besides SOI, EOI, and RSTn.
+				    	segments.add(new Segment(emarker, 0, null));
+						marker = IOUtils.readShortMM(is);
 						break;
 				    case APP1:
 				    	// Read and remove the old XMP data
 				    	length = IOUtils.readUnsignedShortMM(is);
-						byte[] temp = new byte[XMP_EXT_ID.length];
-						IOUtils.readFully(is, temp);
+						byte[] xmpExtId = new byte[XMP_EXT_ID.length];
+						IOUtils.readFully(is, xmpExtId);
 						// Remove XMP and ExtendedXMP segments.
-						if(Arrays.equals(temp, XMP_EXT_ID)) {
-							IOUtils.skipFully(is, length - XMP_EXT_ID.length  - 2);
-						} else if(Arrays.equals(ArrayUtils.subArray(temp, 0, XMP_ID.length), XMP_ID)) {
+						if(Arrays.equals(xmpExtId, XMP_EXT_ID)) {
+							IOUtils.skipFully(is, length - XMP_EXT_ID.length - 2);
+						} else if(Arrays.equals(ArrayUtils.subArray(xmpExtId, 0, XMP_ID.length), XMP_ID)) {
 							IOUtils.skipFully(is,  length - XMP_EXT_ID.length - 2);
-						} else { // We are going to keep other type of data
-							IOUtils.writeShortMM(os, marker);
-							IOUtils.writeShortMM(os, (short) length);
-							IOUtils.write(os, temp); // Write the already read bytes
-							temp = new byte[length - XMP_EXT_ID.length - 2];
+						} else { // We are going to keep other types of data							
+							byte[] temp = new byte[length - XMP_EXT_ID.length - 2];
 							IOUtils.readFully(is, temp);
-							IOUtils.write(os, temp);
+							segments.add(new Segment(emarker, length, ArrayUtils.concat(xmpExtId, temp)));
+							// If it's EXIF, we keep the index
+							if(Arrays.equals(ArrayUtils.subArray(xmpExtId, 0, EXIF_ID.length), EXIF_ID)) {
+								exifIndex = segments.size() - 1;
+							}
 						}
 						marker = IOUtils.readShortMM(is);
-						break;						
+						break;
+				    case APP0:
+				    	app0Index = segments.size();
 				    default:
 					    length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
-					    IOUtils.writeShortMM(os, marker);
-					    IOUtils.writeShortMM(os, (short)length);
 					    IOUtils.readFully(is, buf);
-					    IOUtils.write(os, buf);
+					    segments.add(new Segment(emarker, length, buf));
 					    marker = IOUtils.readShortMM(is);
 				}
 			}
