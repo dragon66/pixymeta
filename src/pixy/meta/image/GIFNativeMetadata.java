@@ -25,4 +25,9 @@ public class GIFNativeMetadata extends NativeMetadata<ApplicationExtension> {
 	public String getMimeType() {
 		return "image/gif";
 	}
+
+	@Override
+	public void showMetadata() {
+		;
+	}
 }

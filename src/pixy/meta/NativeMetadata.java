@@ -15,15 +15,16 @@ public abstract class NativeMetadata<T> {
 		metadataList = meta;
 	}
 	
-	public List<T> getMetadataList() {
-		return Collections.unmodifiableList(metadataList);
-	}
-	
-	public abstract String getMimeType();
-	
 	public void addMeta(T meta) {
 		if(metadataList == null)
 			metadataList = new ArrayList<T>();
 		metadataList.add(meta);
 	}
+	
+	public List<T> getMetadataList() {
+		return Collections.unmodifiableList(metadataList);
+	}
+	
+	public abstract String getMimeType();
+	public abstract void showMetadata();	
 }
