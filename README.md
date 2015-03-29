@@ -27,4 +27,4 @@ Image metadata manipulation:
 
 This is the meta data related part branched out from icafe repository and use icafe as a library.
 
-[Project using pixymeta-andord](https://hosunghwang.wordpress.com/2015/03/18/ccl-license-tagging-java-implementation-for-image/)
+[Project using pixymeta](https://hosunghwang.wordpress.com/2015/03/18/ccl-license-tagging-java-implementation-for-image/)
