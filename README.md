@@ -26,3 +26,5 @@ Image metadata manipulation:
    * In case of JPEG, handle normal XMP and extendedXMP which cannot fit into one APP1 segment
 
 This is the meta data related part branched out from icafe repository and use icafe as a library.
+
+[Project using pixymeta-andord](https://hosunghwang.wordpress.com/2015/03/18/ccl-license-tagging-java-implementation-for-image/)
