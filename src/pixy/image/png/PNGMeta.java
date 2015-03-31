@@ -13,11 +13,13 @@
  *
  * Who   Date       Description
  * ====  =========  =================================================
+ * WY    30Mar2015  Added insertICCProfile()
  * WY    13Mar2015  Initial creation
  */
 
 package pixy.image.png;
 
+import java.awt.color.ICC_Profile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +42,7 @@ import pixy.meta.adobe.XMP;
 import pixy.meta.icc.ICCProfile;
 import cafe.image.png.Chunk;
 import cafe.image.png.ChunkType;
+import cafe.image.png.ICCPBuilder;
 import cafe.image.png.TextBuilder;
 import cafe.image.png.TextReader;
 import cafe.image.png.UnknownChunk;
@@ -79,6 +82,17 @@ public class PNGMeta {
   		IOUtils.writeLongMM(os, SIGNATURE);
 	
         serializeChunks(list, os);
+  	}
+  	
+  	public static void insertICCProfile(String profile_name, byte[] icc_profile, InputStream is, OutputStream os) throws IOException {
+  		ICCPBuilder builder = new ICCPBuilder();
+  		builder.name(profile_name);
+  		builder.data(icc_profile);
+  		insertChunk(builder.build(), is, os);
+  	}
+  	
+  	public static void insertICCProfile(String profile_name, ICC_Profile icc_profile, InputStream is, OutputStream os) throws IOException {
+  		insertICCProfile(profile_name, icc_profile.getData(), is, os);
   	}
   	
   	public static void insertXMP(InputStream is, OutputStream os, String xmp) throws IOException {
