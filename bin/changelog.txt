@@ -1,4 +1,5 @@
 ***************************
-Last modified on 03/14/2015
+Last modified on 04/07/2015
 ***************************
+07Apr2015  Merge Adobe IPTC and TIFF IPTC if both exist
 14Mar2015  Extracted from icafe
