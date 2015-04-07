@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  =================================================
+ * WY    07Apr2015  Merge Adobe IPTC and TIFF IPTC if both exist
  * WY    13Mar2015  Initial creation
  */
 
@@ -1338,10 +1339,8 @@ public class TIFFMeta {
 				iptcData = ArrayUtils.toByteArray(field.getDataAsLong(), rin.getEndian() == IOUtils.BIG_ENDIAN);		
 			else
 				iptcData = (byte[])field.getData();
-			// If we have IPTC data from IRB, consolidate it with the current data
-			if(iptc != null) {
+			if(iptc != null) // If we have IPTC data from IRB, consolidate it with the current data
 				iptcData = ArrayUtils.concat(iptcData, iptc.getData());
-			}
 			metadataMap.put(MetadataType.IPTC, new IPTC(iptcData));
 		}
 		field = currIFD.getField(TiffTag.EXIF_SUB_IFD);
