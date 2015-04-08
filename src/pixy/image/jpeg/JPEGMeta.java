@@ -507,12 +507,10 @@ public class JPEGMeta {
 		    	ExifThumbnail newThumbnail = exif.getThumbnail();
 		    	// Got to do something to keep the old data
 		    	if(update && oldExif != null) {
-		    		ExifReader reader = oldExif.getReader();
-		    		if(reader != null) reader.read();
-		    		IFD imageIFD = reader.getImageIFD();
-			    	IFD exifSubIFD = reader.getExifIFD();
-			    	IFD gpsSubIFD = reader.getGPSIFD();
-			    	ExifThumbnail thumbnail = reader.getThumbnail();
+		    		IFD imageIFD = oldExif.getImageIFD();
+			    	IFD exifSubIFD = oldExif.getExifIFD();
+			    	IFD gpsSubIFD = oldExif.getGPSIFD();
+			    	ExifThumbnail thumbnail = oldExif.getThumbnail();
 			    	
 			    	if(imageIFD != null) {
 			    		if(newImageIFD != null)
@@ -543,13 +541,13 @@ public class JPEGMeta {
 		    		exif.setImageIFD(newImageIFD);
 		    	} else { // Otherwise, set EXIF and GPS IFD separately
 		    		exif.setExifIFD(newExifSubIFD);
-		    		exif.setGPSSubIFD(newGpsSubIFD);
+		    		exif.setGPSIFD(newGpsSubIFD);
 		    	}
 		   		exif.setThumbnail(newThumbnail);
 		   		// Now insert the new EXIF to the JPEG
 		   		exif.write(os);		     	
 		     	// Copy the remaining segments
-				for(int i = (oldExifIndex < 0 ? 0 : oldExifIndex + 1); i < segments.size(); i++) {
+				for(int i = oldExifIndex + 1; i < segments.size(); i++) {
 					segments.get(i).write(os);
 				}	    	
 				// Copy the leftover stuff
