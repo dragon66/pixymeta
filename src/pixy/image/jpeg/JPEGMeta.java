@@ -384,17 +384,16 @@ public class JPEGMeta {
 						if (Arrays.equals(exif_buf, EXIF_ID)) {
 							exif_buf = new byte[length - 8];
 						    IOUtils.readFully(is, exif_buf);
-						    ExifReader reader = new ExifReader(exif_buf);
-						    reader.read();
-						    if(reader.containsThumbnail()) {
+						    Exif exif = new JpegExif(exif_buf);
+						    if(exif.containsThumbnail()) {
 						    	String outpath = "";
 								if(pathToThumbnail.endsWith("\\") || pathToThumbnail.endsWith("/"))
 									outpath = pathToThumbnail + "exif_thumbnail";
 								else
 									outpath = pathToThumbnail.replaceFirst("[.][^.]+$", "") + "_exif_t";
-						    	ExifThumbnail thumbnail = reader.getThumbnail();
+						    	Thumbnail thumbnail = exif.getThumbnail();
 						    	OutputStream fout = null;
-						    	if(thumbnail.getDataType() == ExifThumbnail.DATA_TYPE_KJpegRGB) {// JPEG format, save as JPEG
+						    	if(thumbnail.getDataType() == Thumbnail.DATA_TYPE_KJpegRGB) {// JPEG format, save as JPEG
 						    		 fout = new FileOutputStream(outpath + ".jpg");						    	
 						    	} else { // Uncompressed, save as TIFF
 						    		fout = new FileOutputStream(outpath + ".tif");
@@ -416,10 +415,9 @@ public class JPEGMeta {
 						while(data[i] != 0) i++;
 						
 						if(new String(data, 0, i++).equals("Photoshop 3.0")) {
-							IRBReader reader = new IRBReader(ArrayUtils.subArray(data, i, data.length - i));
-							reader.read();
-							if(reader.containsThumbnail()) {
-								IRBThumbnail thumbnail = reader.getThumbnail();
+							IRB irb = new IRB(ArrayUtils.subArray(data, i, data.length - i));
+							if(irb.containsThumbnail()) {
+								Thumbnail thumbnail = irb.getThumbnail();
 								// Create output path
 								String outpath = "";
 								if(pathToThumbnail.endsWith("\\") || pathToThumbnail.endsWith("/"))
@@ -469,7 +467,7 @@ public class JPEGMeta {
 	 */
 	public static void insertExif(InputStream is, OutputStream os, Exif exif, boolean update) throws IOException {
 		// We need thumbnail image but don't have one, create one from the current image input stream
-		if(exif.isThumbnailRequired() && !exif.containsImage()) {
+		if(exif.isThumbnailRequired() && !exif.containsThumbnail()) {
 			is = new FileCacheRandomAccessInputStream(is);
 			// Insert thumbnail into EXIF wrapper
 			exif.setThumbnailImage(IMGUtils.createThumbnail(is));
@@ -569,22 +567,17 @@ public class JPEGMeta {
 				    case APP1:
 				    	// Read and remove the old EXIF data
 				    	length = IOUtils.readUnsignedShortMM(is);
-						byte[] exifId = new byte[EXIF_ID.length];
-						IOUtils.readFully(is, exifId);
+				    	byte[] exifBytes = new byte[length - 2];
+						IOUtils.readFully(is, exifBytes);
+						// Add data to segment list
+						segments.add(new Segment(emarker, length, exifBytes));
 						// Read the EXIF data.
-						if(Arrays.equals(exifId, EXIF_ID)) { // We assume EXIF data exist only in one APP1
-							byte[] exifBytes = new byte[length - EXIF_ID.length - 2];
-							IOUtils.readFully(is, exifBytes);
-							segments.add(new Segment(emarker, length, exifBytes));
-							oldExif = new JpegExif(exifBytes);
+						if(Arrays.equals(ArrayUtils.subArray(exifBytes, 0, EXIF_ID.length), EXIF_ID)) { // We assume EXIF data exist only in one APP1
+							oldExif = new JpegExif(ArrayUtils.subArray(exifBytes, EXIF_ID.length, length - EXIF_ID.length - 2));
 							oldExifIndex = segments.size() - 1;
-						} else { // We are going to keep other types of data
-							byte[] temp = new byte[length - EXIF_ID.length - 2];
-							IOUtils.readFully(is, temp);
-							segments.add(new Segment(emarker, length, ArrayUtils.concat(exifId, temp)));
-						}
+						}											
 						marker = IOUtils.readShortMM(is);
-						break;				
+						break;
 				    default:
 					    length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];

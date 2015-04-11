@@ -1,8 +1,29 @@
+/**
+ * Copyright (c) 2014-2015 by Wen Yu.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Any modifications to this file must keep this entire header intact.
+ * 
+ * Change History - most recent changes go on top of previous changes
+ *
+ * ExifThumbnail.java
+ *
+ * Who   Date          Description
+ * ====  ==========    ===============================================
+ * WY    10Apr2015     Changed to abstract class, added write()
+ * WY    09Apr2015     Added setWriteQuality()
+ */
+
 package pixy.meta;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class Thumbnail {
+public abstract class Thumbnail {
 	// Internal data type for thumbnail
 	// Represented by a BufferedImage
 	public static final int DATA_TYPE_KRawRGB = 0; // This is from IRBThumbnail
@@ -12,6 +33,8 @@ public class Thumbnail {
 	
 	private BufferedImage thumbnail;
 	private byte[] compressedThumbnail;
+	
+	protected int writeQuality = 100; // Default JPEG write quality
 	
 	private int width;
 	private int height;
@@ -82,4 +105,10 @@ public class Thumbnail {
 			this.dataType = dataType;
 		}
 	}
+	
+	public void setWriteQuality(int quality) {
+		this.writeQuality = quality;
+	}
+	
+	public abstract void write(OutputStream os) throws IOException;
 }

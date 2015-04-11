@@ -41,7 +41,6 @@ import org.w3c.dom.Document;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.IRB;
-import pixy.meta.adobe.IRBReader;
 import pixy.meta.adobe.IRBThumbnail;
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe.XMP;
@@ -494,10 +493,9 @@ public class TIFFMeta {
 		TiffField<?> f_photoshop = workingPage.getField(TiffTag.PHOTOSHOP);
 		if(f_photoshop != null) {
 			byte[] data = (byte[])f_photoshop.getData();
-			IRBReader reader = new IRBReader(data);
-			reader.read();
-			if(reader.containsThumbnail()) {
-				IRBThumbnail thumbnail = reader.getThumbnail();
+			IRB irb = new IRB(data);
+			if(irb.containsThumbnail()) {
+				IRBThumbnail thumbnail = irb.getThumbnail();
 				return thumbnail;					
 			}		
 		}

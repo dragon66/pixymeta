@@ -13,6 +13,8 @@
  *
  * Who   Date          Description
  * ====  ==========    =================================================
+ * WY    10Apr2015     Added new constructor, changed write()
+ * WY    09Apr2015     Moved setWriteQuality() to super class
  * WY    13Mar2015     initial creation
  */
 
@@ -21,10 +23,10 @@ package pixy.meta.exif;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import pixy.image.tiff.TIFFMeta;
 import pixy.meta.Thumbnail;
 import cafe.image.ImageIO;
 import cafe.image.ImageParam;
@@ -34,11 +36,13 @@ import cafe.image.tiff.IFD;
 import cafe.image.tiff.LongField;
 import cafe.image.tiff.RationalField;
 import cafe.image.tiff.ShortField;
+import cafe.image.tiff.TIFFTweaker;
 import cafe.image.tiff.TiffField;
 import cafe.image.tiff.TiffFieldEnum;
 import cafe.image.tiff.TiffTag;
 import cafe.image.writer.ImageWriter;
 import cafe.io.FileCacheRandomAccessInputStream;
+import cafe.io.MemoryCacheRandomAccessOutputStream;
 import cafe.io.RandomAccessInputStream;
 import cafe.io.RandomAccessOutputStream;
 
@@ -48,11 +52,11 @@ import cafe.io.RandomAccessOutputStream;
  * @author Wen Yu, yuwen_66@yahoo.com
  * @version 1.0 03/13/2015
  */
+
 public class ExifThumbnail extends Thumbnail {
 	// Comprised of an IFD and an associated image
 	// Create thumbnail IFD (IFD1 in the case of JPEG EXIF segment)
 	private IFD thumbnailIFD = new IFD(); 
-	private int writeQuality = 90; // Default JPEG write quality
 	
 	public ExifThumbnail() { }
 	
@@ -60,18 +64,25 @@ public class ExifThumbnail extends Thumbnail {
 		super(thumbnail);
 	}
 	
+	public ExifThumbnail(int width, int height, int dataType, byte[] compressedThumbnail) {
+		super(width, height, dataType, compressedThumbnail);
+	}
+	
 	public ExifThumbnail(int width, int height, int dataType, byte[] compressedThumbnail, IFD thumbnailIFD) {
 		super(width, height, dataType, compressedThumbnail);
 		this.thumbnailIFD = thumbnailIFD;
 	}
 	
-	public void setWriteQuality(int quality) {
-		this.writeQuality = quality;
-	}
-	
-	public void write(RandomAccessOutputStream randOS, int offset) throws IOException {
+	public void write(OutputStream os) throws IOException {
+		RandomAccessOutputStream randOS = null;
+		if(os instanceof RandomAccessOutputStream) randOS = (RandomAccessOutputStream)os;
+		else randOS = new MemoryCacheRandomAccessOutputStream(os);
+		int offset = (int)randOS.getStreamPointer(); // Get current write position
 		if(getDataType() == Thumbnail.DATA_TYPE_KJpegRGB) { // Compressed old-style JPEG format
+			byte[] compressedImage = getCompressedImage();
+			if(compressedImage == null) throw new IllegalArgumentException("Expected compressed thumbnail data does not exist!");
 			thumbnailIFD.addField(new LongField(TiffTag.JPEG_INTERCHANGE_FORMAT.getValue(), new int[] {0})); // Placeholder
+			thumbnailIFD.addField(new LongField(TiffTag.JPEG_INTERCHANGE_FORMAT_LENGTH.getValue(), new int[] {compressedImage.length}));
 			offset = thumbnailIFD.write(randOS, offset);
 			// This line is very important!!!
 			randOS.seek(offset);
@@ -83,7 +94,7 @@ public class ExifThumbnail extends Thumbnail {
 			// Read the IFDs into a list first
 			List<IFD> list = new ArrayList<IFD>();			   
 			RandomAccessInputStream tiffIn = new FileCacheRandomAccessInputStream(new ByteArrayInputStream(getCompressedImage()));
-			TIFFMeta.readIFDs(list, tiffIn);
+			TIFFTweaker.readIFDs(list, tiffIn);
 			TiffField<?> stripOffset = list.get(0).getField(TiffTag.STRIP_OFFSETS);
     		if(stripOffset == null) 
     			stripOffset = list.get(0).getField(TiffTag.TILE_OFFSETS);
@@ -160,5 +171,7 @@ public class ExifThumbnail extends Thumbnail {
 			randOS.seek(thumbnailIFD.getField(TiffTag.JPEG_INTERCHANGE_FORMAT_LENGTH).getDataOffset());
 			randOS.writeInt(totalOut);
 		}
+		// Close the RandomAccessOutputStream instance if we created it locally
+		if(!(os instanceof RandomAccessOutputStream)) randOS.close();
 	}
 }
