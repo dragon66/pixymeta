@@ -28,8 +28,6 @@ import java.util.Map;
 
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
-import pixy.meta.iptc.IPTCDataSet;
-import pixy.meta.iptc.IPTCReader;
 import cafe.io.IOUtils;
 
 public class IPTC extends Metadata {
@@ -128,6 +126,17 @@ public class IPTC extends Metadata {
 	
 	public IPTCReader getReader() {
 		return reader;
+	}
+	
+	public void showMetadata() {
+		if(datasetMap != null){
+			// Print multiple entry IPTCDataSet
+			for(List<IPTCDataSet> iptcs : datasetMap.values()) {
+				for(IPTCDataSet iptc : iptcs)
+					iptc.print();
+			}
+		} else
+			super.showMetadata();
 	}
 	
 	public void write(OutputStream os) throws IOException {
