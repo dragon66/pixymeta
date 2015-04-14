@@ -86,6 +86,7 @@ import pixy.meta.Thumbnail;
 import pixy.meta.adobe.IRB;
 import pixy.meta.adobe.IRBReader;
 import pixy.meta.adobe.IRBThumbnail;
+import pixy.meta.adobe.ThumbnailResource;
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe.XMP;
 import pixy.meta.adobe._8BIM;
@@ -98,7 +99,6 @@ import pixy.meta.image.Comment;
 import pixy.meta.image.ImageMetadata;
 import pixy.meta.iptc.IPTC;
 import pixy.meta.iptc.IPTCDataSet;
-import pixy.util.MetadataUtils;
 
 /**
  * JPEG image tweaking tool
@@ -899,7 +899,8 @@ public class JPEGMeta {
 	public static void insertIRBThumbnail(InputStream is, OutputStream os, BufferedImage thumbnail) throws IOException {
 		// Sanity check
 		if(thumbnail == null) throw new IllegalArgumentException("Input thumbnail is null");
-		insertIRB(is, os, Arrays.asList(MetadataUtils.createThumbnail8BIM(thumbnail)), true); // Set true to keep other IRB blocks
+		_8BIM[] bims = {new ThumbnailResource(thumbnail)};
+		insertIRB(is, os, Arrays.asList(bims), true); // Set true to keep other IRB blocks
 	}
 	
 	/*

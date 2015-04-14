@@ -1,11 +1,19 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
  * Any modifications to this file must keep this entire header intact.
+ * 
+ * Change History - most recent changes go on top of previous changes
+ *
+ * IRBReader.java
+ *
+ * Who   Date       Description
+ * ====  =========  ===========================================================
+ * WY    13Apr2015  Changed thumbnail from IRBThumbnail to ThumbnailResource
  */
 
 package pixy.meta.adobe;
@@ -34,7 +42,7 @@ import cafe.util.ArrayUtils;
 public class IRBReader implements MetadataReader {
 	private byte[] data;
 	private boolean containsThumbnail;
-	private IRBThumbnail thumbnail;
+	private ThumbnailResource thumbnail;
 	private boolean loaded;
 	Map<Short, _8BIM> _8bims = new HashMap<Short, _8BIM>();
 	
@@ -72,7 +80,7 @@ public class IRBReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		return thumbnail;
+		return thumbnail.getThumbnail();
 	}
 	
 	public boolean isDataLoaded() {
@@ -139,7 +147,7 @@ public class IRBReader implements MetadataReader {
 					else if(thumbnailFormat == IRBThumbnail.DATA_TYPE_KRawRGB)
 						thumbnailData = ArrayUtils.subArray(data, i + 28, totalSize);
 					// JFIF data in RGB format. For resource ID 1033 (0x0409) the data is in BGR format.
-					thumbnail = new IRBThumbnail(eId, thumbnailFormat, width, height, widthBytes, totalSize, sizeAfterCompression, bitsPerPixel, numOfPlanes, thumbnailData);
+					thumbnail = new ThumbnailResource(eId, thumbnailFormat, width, height, widthBytes, totalSize, sizeAfterCompression, bitsPerPixel, numOfPlanes, thumbnailData);
 				}				
 				i += size;
 				if(size%2 != 0) i++; // Skip padding byte
