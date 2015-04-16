@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  =================================================
+ * WY    16Apr2015  Changed insertIRB() parameter List to Collection
  * WY    13Mar2015  initial creation
  */
 
@@ -26,8 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import pixy.image.bmp.BMPMeta;
@@ -171,11 +172,11 @@ public abstract class Metadata {
 		}		
 	}
 
-	public static void insertIPTC(InputStream is, OutputStream out, List<IPTCDataSet> iptcs) throws IOException {
+	public static void insertIPTC(InputStream is, OutputStream out, Collection<IPTCDataSet> iptcs) throws IOException {
 		insertIPTC(is, out, iptcs, false);
 	}
 	
-	public static void insertIPTC(InputStream is, OutputStream out, List<IPTCDataSet> iptcs, boolean update) throws IOException {
+	public static void insertIPTC(InputStream is, OutputStream out, Collection<IPTCDataSet> iptcs, boolean update) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
 		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
 		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
@@ -204,11 +205,11 @@ public abstract class Metadata {
 		}		
 	}
 	
-	public static void insertIRB(InputStream is, OutputStream out, List<_8BIM> bims) throws IOException {
+	public static void insertIRB(InputStream is, OutputStream out, Collection<_8BIM> bims) throws IOException {
 		insertIRB(is, out, bims, false);
 	}
 	
-	public static void insertIRB(InputStream is, OutputStream out, List<_8BIM> bims, boolean update) throws IOException {
+	public static void insertIRB(InputStream is, OutputStream out, Collection<_8BIM> bims, boolean update) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
 		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
 		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
