@@ -24,6 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import pixy.image.tiff.TIFFMeta;
@@ -63,7 +64,10 @@ public class ExifReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		return ifds.get(0).getChild(TiffTag.EXIF_SUB_IFD);
+		IFD exifSubIFD = ifds.get(0).getChild(TiffTag.EXIF_SUB_IFD);
+		if(exifSubIFD != null)
+			return new IFD(exifSubIFD);
+		return null;
 	}
 	
 	public IFD getGPSIFD() {
@@ -74,7 +78,10 @@ public class ExifReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		return ifds.get(0).getChild(TiffTag.GPS_SUB_IFD);
+		IFD gpsSubIFD = ifds.get(0).getChild(TiffTag.GPS_SUB_IFD);
+		if(gpsSubIFD != null)
+			return new IFD(gpsSubIFD);
+		return null;
 	}
 	
 	public IFD getImageIFD() {
@@ -85,7 +92,7 @@ public class ExifReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		return ifds.get(0);
+		return new IFD(ifds.get(0));
 	}
 	
 	public List<IFD> getIFDs() {
@@ -96,7 +103,7 @@ public class ExifReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		return ifds;
+		return Collections.unmodifiableList(ifds);
 	}
 	
 	public boolean containsThumbnail() {
