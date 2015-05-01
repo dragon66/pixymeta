@@ -25,6 +25,6 @@ Image metadata manipulation:
    * Extract XMP metadata from JPEG, GIF, PNG, and TIFF image
    * In case of JPEG, handle normal XMP and extendedXMP which cannot fit into one APP1 segment
 
-This is the meta data related part branched out from icafe repository and use icafe as a library.
+This is the meta data related part branched out from icafe repository.
 
 [Project using pixymeta](https://github.com/creativecommons/seneca)
