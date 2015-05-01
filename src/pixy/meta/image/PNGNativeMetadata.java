@@ -3,7 +3,7 @@ package pixy.meta.image;
 import java.util.List;
 
 import pixy.meta.NativeMetadata;
-import cafe.image.png.Chunk;
+import pixy.image.png.Chunk;
 
 /**
  * PNG native image metadata

@@ -32,9 +32,9 @@ import pixy.meta.iptc.IPTCPostObjectDataTag;
 import pixy.meta.iptc.IPTCPreObjectDataTag;
 import pixy.meta.iptc.IPTCRecord;
 import pixy.meta.iptc.IPTCTag;
-import cafe.io.IOUtils;
-import cafe.string.StringUtils;
-import cafe.util.ArrayUtils;
+import pixy.io.IOUtils;
+import pixy.string.StringUtils;
+import pixy.util.ArrayUtils;
 
 /**
  * International Press Telecommunications Council (IPTC) data set

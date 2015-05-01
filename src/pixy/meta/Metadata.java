@@ -14,12 +14,12 @@
  * Who   Date       Description
  * ====  =========  =================================================
  * WY    16Apr2015  Changed insertIRB() parameter List to Collection
+ * WY    16Apr2015  Removed ICC_Profile related code
  * WY    13Mar2015  initial creation
  */
 
 package pixy.meta;
 
-import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,18 +37,17 @@ import pixy.image.jpeg.JPEGMeta;
 import pixy.image.png.PNGMeta;
 import pixy.image.tiff.TIFFMeta;
 import pixy.meta.Metadata;
+import pixy.util.MetadataUtils;
 import pixy.meta.MetadataReader;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe._8BIM;
 import pixy.meta.exif.Exif;
 import pixy.meta.iptc.IPTCDataSet;
-import cafe.image.ImageIO;
-import cafe.image.ImageType;
-import cafe.image.util.IMGUtils;
-import cafe.io.FileCacheRandomAccessInputStream;
-import cafe.io.FileCacheRandomAccessOutputStream;
-import cafe.io.RandomAccessInputStream;
-import cafe.io.RandomAccessOutputStream;
+import pixy.image.ImageType;
+import pixy.io.FileCacheRandomAccessInputStream;
+import pixy.io.FileCacheRandomAccessOutputStream;
+import pixy.io.RandomAccessInputStream;
+import pixy.io.RandomAccessOutputStream;
 
 /**
  * Base class for image metadata.
@@ -57,6 +56,7 @@ import cafe.io.RandomAccessOutputStream;
  * @version 1.0 01/12/2015
  */
 public abstract class Metadata {
+	public static final int IMAGE_MAGIC_NUMBER_LEN = 4;
 	// Fields
 	private MetadataType type;
 	private byte[] data;
@@ -69,8 +69,8 @@ public abstract class Metadata {
 	
 	public static void extractThumbnails(InputStream is, String pathToThumbnail) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate thumbnail extracting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -113,8 +113,8 @@ public abstract class Metadata {
 	
 	public static void insertExif(InputStream is, OutputStream out, Exif exif, boolean update) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate EXIF inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -140,14 +140,10 @@ public abstract class Metadata {
 		}		
 	}
 	
-	public static void insertICCProfile(InputStream is, OutputStream out, ICC_Profile icc_profile) throws IOException {
-		insertICCProfile(is, out, icc_profile.getData());
-	}
-	
 	public static void insertICCProfile(InputStream is, OutputStream out, byte[] icc_profile) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate ICCP inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -178,8 +174,8 @@ public abstract class Metadata {
 	
 	public static void insertIPTC(InputStream is, OutputStream out, Collection<IPTCDataSet> iptcs, boolean update) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate IPTC inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -211,8 +207,8 @@ public abstract class Metadata {
 	
 	public static void insertIRB(InputStream is, OutputStream out, Collection<_8BIM> bims, boolean update) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate IRB inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -240,8 +236,8 @@ public abstract class Metadata {
 	
 	public static void insertIRBThumbnail(InputStream is, OutputStream out, BufferedImage thumbnail) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate IRB thumbnail inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -269,8 +265,8 @@ public abstract class Metadata {
 	
 	public static void insertXMP(InputStream is, OutputStream out, String xmp) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate XMP inserting to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:
@@ -319,8 +315,8 @@ public abstract class Metadata {
 		// Metadata map for all the Metadata read
 		Map<MetadataType, Metadata> metadataMap = new HashMap<MetadataType, Metadata>();
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate metadata reading to corresponding image tweakers.
 		switch(imageType) {
 			case JPG:
@@ -363,8 +359,8 @@ public abstract class Metadata {
 	 */
 	public static void removeMetadata(InputStream is, OutputStream os, MetadataType ...metadataTypes) throws IOException {
 		// ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes as image magic number
-		PushbackInputStream pushbackStream = new PushbackInputStream(is, ImageIO.IMAGE_MAGIC_NUMBER_LEN);
-		ImageType imageType = IMGUtils.guessImageType(pushbackStream);		
+		PushbackInputStream pushbackStream = new PushbackInputStream(is, IMAGE_MAGIC_NUMBER_LEN);
+		ImageType imageType = MetadataUtils.guessImageType(pushbackStream);		
 		// Delegate meta data removing to corresponding image tweaker.
 		switch(imageType) {
 			case JPG:

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,9 @@
  *
  * Who   Date       Description
  * ====  =======    =================================================
- * WY    13Nar2015  Initial creation
+ * WY    11Feb2015  Moved showMetadata() to Exif
+ * WY    06Feb2015  Added showMetadata()
+ * WY    03Feb2015  Initial creation
  */
 
 package pixy.meta.exif;
@@ -21,8 +23,7 @@ package pixy.meta.exif;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import pixy.meta.exif.Exif;
-import cafe.image.tiff.IFD;
+import pixy.image.tiff.IFD;
 
 public class TiffExif extends Exif {
 
@@ -42,6 +43,6 @@ public class TiffExif extends Exif {
 	 */
 	@Override
 	public void write(OutputStream os) throws IOException {
-		;
+		; // We won't write anything here
 	}
 }

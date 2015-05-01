@@ -18,7 +18,7 @@ import java.util.Map;
 
 import pixy.meta.icc.ICCProfile;
 import pixy.meta.icc.ProfileTag;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 /**
  * ICC Profile Tag Table

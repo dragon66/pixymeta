@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,7 +13,7 @@
  *
  * Who   Date       Description
  * ====  =======    =================================================
- * WY    13Mar2015  Initial creation
+ * WY    03Feb2015  Initial creation
  */
 
 package pixy.meta.exif;
@@ -24,17 +24,16 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import pixy.meta.exif.Exif;
-import cafe.image.jpeg.Marker;
-import cafe.image.tiff.ASCIIField;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.LongField;
-import cafe.image.tiff.TiffField;
-import cafe.image.tiff.TiffTag;
-import cafe.io.IOUtils;
-import cafe.io.MemoryCacheRandomAccessOutputStream;
-import cafe.io.RandomAccessOutputStream;
-import cafe.io.WriteStrategyMM;
+import pixy.image.jpeg.Marker;
+import pixy.image.tiff.ASCIIField;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.LongField;
+import pixy.image.tiff.TiffField;
+import pixy.image.tiff.TiffTag;
+import pixy.io.IOUtils;
+import pixy.io.MemoryCacheRandomAccessOutputStream;
+import pixy.io.RandomAccessOutputStream;
+import pixy.io.WriteStrategyMM;
 
 public class JpegExif extends Exif {
 

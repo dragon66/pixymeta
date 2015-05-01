@@ -26,7 +26,7 @@ import org.w3c.dom.NodeList;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.XMPReader;
-import cafe.string.XMLUtils;
+import pixy.string.XMLUtils;
 
 public class XMP extends Metadata {
 	// Fields

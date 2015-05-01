@@ -35,10 +35,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import cafe.image.writer.ImageWriter;
-import cafe.image.writer.JPEGWriter;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 import pixy.meta.Thumbnail;
+import pixy.util.MetadataUtils;
 
 public class ThumbnailResource extends _8BIM {
 	// Check to make sure id is either ImageResourceID.THUMBNAIL_RESOURCE_PS4
@@ -103,12 +102,7 @@ public class ThumbnailResource extends _8BIM {
 		// Create memory buffer to write data
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		// Compress the thumbnail
-		ImageWriter writer = new JPEGWriter();
-		try {
-			writer.write(thumbnail, bout);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		MetadataUtils.saveAsJPEG(thumbnail, bout, 100);
 		byte[] data = bout.toByteArray();
 		this.id = ImageResourceID.THUMBNAIL_RESOURCE_PS5;
 		// Write thumbnail dimension

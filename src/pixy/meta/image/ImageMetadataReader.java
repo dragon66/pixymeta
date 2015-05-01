@@ -26,7 +26,7 @@ import org.w3c.dom.Document;
 
 import pixy.meta.MetadataReader;
 import pixy.meta.Thumbnail;
-import cafe.string.XMLUtils;
+import pixy.string.XMLUtils;
 
 public class ImageMetadataReader implements MetadataReader {
 	// Fields definition

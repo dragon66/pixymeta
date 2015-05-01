@@ -13,7 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  ==================================================
- *WY    30Mar2015  Fixed bug with insertXMP() replacing '\0' with ' '
+ * WY    30Mar2015  Fixed bug with insertXMP() replacing '\0' with ' '
  * WY    13Mar2015  Initial creation
  */
 
@@ -33,10 +33,9 @@ import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.XMP;
 import pixy.meta.image.Comment;
-import cafe.image.options.GIFOptions;
-import cafe.io.IOUtils;
-import cafe.string.XMLUtils;
-import cafe.util.ArrayUtils;
+import pixy.io.IOUtils;
+import pixy.string.XMLUtils;
+import pixy.util.ArrayUtils;
 
 /**
  * GIF Metadata tool
@@ -53,6 +52,11 @@ public class GIFMeta {
 	public static final byte APPLICATION_EXTENSION_LABEL = (byte)0xff;
 	public static final byte COMMENT_EXTENSION_LABEL = (byte)0xfe;
 	public static final byte TEXT_EXTENSION_LABEL = 0x01;
+	
+	public static final int DISPOSAL_UNSPECIFIED = 0;		
+	public static final int DISPOSAL_LEAVE_AS_IS = 1;
+	public static final int DISPOSAL_RESTORE_TO_BACKGROUND = 2;
+	public static final int DISPOSAL_RESTORE_TO_PREVIOUS = 3;
 	
 	// Data transfer object for multiple thread support
 	private static class DataTransferObject {
@@ -155,13 +159,13 @@ public class GIFMeta {
 					// Determine the disposal method
 					disposalMethod = ((packedFields&0x1c)>>2);
 					switch(disposalMethod) {
-						case GIFOptions.DISPOSAL_UNSPECIFIED:
+						case DISPOSAL_UNSPECIFIED:
 							// Frame disposal method: UNSPECIFIED
-						case GIFOptions.DISPOSAL_LEAVE_AS_IS:
+						case DISPOSAL_LEAVE_AS_IS:
 							// Frame disposal method: LEAVE_AS_IS
-						case GIFOptions.DISPOSAL_RESTORE_TO_BACKGROUND:
+						case DISPOSAL_RESTORE_TO_BACKGROUND:
 							// Frame disposal method: RESTORE_TO_BACKGROUND
-						case GIFOptions.DISPOSAL_RESTORE_TO_PREVIOUS:
+						case DISPOSAL_RESTORE_TO_PREVIOUS:
 							// Frame disposal method: RESTORE_TO_PREVIOUS
 							break;
 						default:

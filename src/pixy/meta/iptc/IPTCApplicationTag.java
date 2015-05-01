@@ -16,7 +16,7 @@ import java.util.Map;
 
 import pixy.meta.iptc.IPTCApplicationTag;
 import pixy.meta.iptc.IPTCTag;
-import cafe.string.StringUtils;
+import pixy.string.StringUtils;
 
 /**
  * Defines DataSet tags for IPTC Application Record - Record number 2.

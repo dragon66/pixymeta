@@ -12,15 +12,15 @@
  * TIFFMeta.java
  *
  * Who   Date       Description
- * ====  =========  =================================================
+ * ====  =========  ==========================================================
  * WY    15Apr2015  Changed the argument type for insertIPTC() and insertIRB()
- * WY    07Apr2015  Merge Adobe IPTC and TIFF IPTC if both exist
+ * WY    07Apr2015  Removed insertICCProfile() AWT related code
+ * WY    07Apr2015  Merge Adobe IRB IPTC and TIFF IPTC data if both exist
  * WY    13Mar2015  Initial creation
  */
 
 package pixy.image.tiff;
 
-import java.awt.color.ICC_Profile;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
@@ -55,39 +55,42 @@ import pixy.meta.exif.TiffExif;
 import pixy.meta.icc.ICCProfile;
 import pixy.meta.iptc.IPTC;
 import pixy.meta.iptc.IPTCDataSet;
-import cafe.image.ImageIO;
-import cafe.image.ImageType;
-import cafe.image.jpeg.Marker;
-import cafe.image.tiff.ASCIIField;
-import cafe.image.tiff.ByteField;
-import cafe.image.tiff.DoubleField;
-import cafe.image.tiff.FieldType;
-import cafe.image.tiff.FloatField;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.IFDField;
-import cafe.image.tiff.LongField;
-import cafe.image.tiff.RationalField;
-import cafe.image.tiff.SRationalField;
-import cafe.image.tiff.ShortField;
-import cafe.image.tiff.Tag;
-import cafe.image.tiff.TiffField;
-import cafe.image.tiff.TiffFieldEnum;
-import cafe.image.tiff.TiffTag;
-import cafe.image.tiff.UndefinedField;
-import cafe.image.writer.ImageWriter;
-import cafe.io.IOUtils;
-import cafe.io.RandomAccessInputStream;
-import cafe.io.RandomAccessOutputStream;
-import cafe.io.ReadStrategyII;
-import cafe.io.ReadStrategyMM;
-import cafe.io.WriteStrategyII;
-import cafe.io.WriteStrategyMM;
-import cafe.string.StringUtils;
-import cafe.string.XMLUtils;
-import cafe.util.ArrayUtils;
-import static cafe.image.writer.TIFFWriter.*;
+import pixy.image.jpeg.Marker;
+import pixy.image.tiff.ASCIIField;
+import pixy.image.tiff.ByteField;
+import pixy.image.tiff.DoubleField;
+import pixy.image.tiff.FieldType;
+import pixy.image.tiff.FloatField;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.IFDField;
+import pixy.image.tiff.LongField;
+import pixy.image.tiff.RationalField;
+import pixy.image.tiff.SRationalField;
+import pixy.image.tiff.ShortField;
+import pixy.image.tiff.Tag;
+import pixy.image.tiff.TiffField;
+import pixy.image.tiff.TiffFieldEnum;
+import pixy.image.tiff.TiffTag;
+import pixy.image.tiff.UndefinedField;
+import pixy.image.tiff.TIFFImage;
+import pixy.io.IOUtils;
+import pixy.io.RandomAccessInputStream;
+import pixy.io.RandomAccessOutputStream;
+import pixy.io.ReadStrategyII;
+import pixy.io.ReadStrategyMM;
+import pixy.io.WriteStrategyII;
+import pixy.io.WriteStrategyMM;
+import pixy.string.StringUtils;
+import pixy.string.XMLUtils;
+import pixy.util.ArrayUtils;
+import pixy.util.MetadataUtils;
 
 public class TIFFMeta {
+	// Offset where to write the value of the first IFD offset
+	public static final int OFFSET_TO_WRITE_FIRST_IFD_OFFSET = 0x04;
+	public static final int FIRST_WRITE_OFFSET = 0x08;
+	public static final int STREAM_HEAD = 0x00;
+	
 	private static int copyHeader(RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {		
 		rin.seek(STREAM_HEAD);
 		// First 2 bytes determine the byte order of the file, "MM" or "II"
@@ -520,12 +523,7 @@ public class TIFFMeta {
 			if(thumbnail.getDataType() == IRBThumbnail.DATA_TYPE_KJpegRGB) {
 				fout.write(thumbnail.getCompressedImage());
 			} else {
-				ImageWriter writer = ImageIO.getWriter(ImageType.JPG);
-				try {
-					writer.write(thumbnail.getRawImage(), fout);
-				} catch (Exception e) {
-					throw new IOException("Writing thumbnail failed!");
-				}
+				MetadataUtils.saveAsJPEG(thumbnail.getRawImage(), fout, 100);
 			}
 			fout.close();	
 		}			
@@ -696,6 +694,10 @@ public class TIFFMeta {
 		writeToStream(rout, firstIFDOffset);
 	}
 	
+	public static void insertICCProfile(byte[] icc_profile, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
+		insertICCProfile(icc_profile, 0, rin, rout);
+	}
+	
 	/**
 	 * Insert ICC_Profile into TIFF page
 	 * 
@@ -721,23 +723,6 @@ public class TIFFMeta {
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
-	}
-	
-	public static void insertICCProfile(ICC_Profile icc_profile, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
-		insertICCProfile(icc_profile.getData(), 0, rin, rout);
-	}
-	
-	/**
-	 * Insert ICC_Profile into TIFF page
-	 * 
-	 * @param icc_profile ICC_Profile
-	 * @param pageNumber page number to insert the ICC_Profile
-	 * @param rin RandomAccessInputStream for the input image
-	 * @param rout RandomAccessOutputStream for the output image
-	 * @throws Exception
-	 */
-	public static void insertICCProfile(ICC_Profile icc_profile, int pageNumber, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
-		insertICCProfile(icc_profile.getData(), pageNumber, rin, rout);
 	}
 	
 	public static void insertIPTC(RandomAccessInputStream rin, RandomAccessOutputStream rout, Collection<IPTCDataSet> iptcs, boolean update) throws IOException {
@@ -883,7 +868,7 @@ public class TIFFMeta {
 	 *  
 	 * @param rin RandomAccessInputStream for the input TIFF
 	 * @param rout RandomAccessOutputStream for the output TIFF
-	 * @param thumbnail a BufferedImage to be inserted
+	 * @param thumbnail a Bitmap to be inserted
 	 * @throws Exception
 	 */
 	public static void insertThumbnail(RandomAccessInputStream rin, RandomAccessOutputStream rout, BufferedImage thumbnail) throws IOException {
@@ -1031,8 +1016,8 @@ public class TIFFMeta {
 		rin.seek(offset);
 		short tiff_id = rin.readShort();
 		offset +=2;
-		if(tiff_id!=0x2a)//"*" 42 decimal
-		{
+		
+		if(tiff_id!=0x2a) { //"*" 42 decimal
 			rin.close();
 			throw new RuntimeException("Invalid TIFF identifier");
 		}
@@ -1306,7 +1291,7 @@ public class TIFFMeta {
 	
 	public static Map<MetadataType, Metadata> readMetadata(RandomAccessInputStream rin, int pageNumber) throws IOException	{
 		Map<MetadataType, Metadata> metadataMap = new HashMap<MetadataType, Metadata>();
-		System.out.println("*** TIFF snooping starts ***");
+
 		int offset = readHeader(rin);
 		List<IFD> ifds = new ArrayList<IFD>();
 		readIFDs(null, null, TiffTag.class, ifds, offset, rin);
@@ -1335,24 +1320,21 @@ public class TIFFMeta {
 		}
 		field = currIFD.getField(TiffTag.IPTC);
 		if(field != null) { // We have found IPTC data
-			// See if we already have IPTC data from IRB
 			IPTC iptc = (IPTC)(metadataMap.get(MetadataType.IPTC));
 			byte[] iptcData = null;
 			FieldType type = field.getType();
 			if(type == FieldType.LONG)
-				iptcData = ArrayUtils.toByteArray(field.getDataAsLong(), rin.getEndian() == IOUtils.BIG_ENDIAN);		
+				iptcData = ArrayUtils.toByteArray(field.getDataAsLong(), rin.getEndian() == IOUtils.BIG_ENDIAN);
 			else
 				iptcData = (byte[])field.getData();
 			if(iptc != null) // If we have IPTC data from IRB, consolidate it with the current data
 				iptcData = ArrayUtils.concat(iptcData, iptc.getData());
 			metadataMap.put(MetadataType.IPTC, new IPTC(iptcData));
-		}
+		}		
 		field = currIFD.getField(TiffTag.EXIF_SUB_IFD);
 		if(field != null) { // We have found EXIF SubIFD
 			metadataMap.put(MetadataType.EXIF, new TiffExif(currIFD));
 		}
-		
-		System.out.println("*** TIFF snooping ends ***");
 		
 		return metadataMap;
 	}
@@ -1457,6 +1439,111 @@ public class TIFFMeta {
 			// Add new PHOTOSHOP field
 			workingPage.addField(new ByteField(TiffTag.PHOTOSHOP.getValue(), bout.toByteArray()));
 		}		
+	}
+	
+	public static int retainPages(int startPage, int endPage, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
+		if(startPage < 0 || endPage < 0)
+			throw new IllegalArgumentException("Negative start or end page");
+		else if(startPage > endPage)
+			throw new IllegalArgumentException("Start page is larger than end page");
+		
+		List<IFD> list = new ArrayList<IFD>();
+	  
+		int offset = copyHeader(rin, rout);
+		
+		// Step 1: read the IFDs into a list first
+		readIFDs(null, null, TiffTag.class, list, offset, rin);		
+		// Step 2: remove pages from a multiple page TIFF
+		int pagesRetained = list.size();
+		List<IFD> newList = new ArrayList<IFD>();
+		if(startPage <= list.size() - 1)  {
+			if(endPage > list.size() - 1) endPage = list.size() - 1;
+			for(int i = endPage; i >= startPage; i--) {
+				newList.add(list.get(i)); 
+			}
+		}
+		if(newList.size() > 0) {
+			pagesRetained = newList.size();
+			list.retainAll(newList);
+		}
+		// Reset pageNumber for the existing pages
+		for(int i = 0; i < list.size(); i++) {
+			list.get(i).removeField(TiffTag.PAGE_NUMBER);
+			list.get(i).addField(new ShortField(TiffTag.PAGE_NUMBER.getValue(), new short[]{(short)i, (short)(list.size() - 1)}));
+		}
+		// End of removing pages		
+		// Step 3: copy the remaining pages
+		// 0x08 is the first write offset
+		int writeOffset = FIRST_WRITE_OFFSET;
+		offset = copyPages(list, writeOffset, rin, rout);
+		int firstIFDOffset = list.get(0).getStartOffset();
+		
+		writeToStream(rout, firstIFDOffset);
+		
+		return pagesRetained;
+	}
+	
+	// Return number of pages retained
+	public static int retainPages(RandomAccessInputStream rin, RandomAccessOutputStream rout, int... pages) throws IOException {
+		List<IFD> list = new ArrayList<IFD>();
+	  
+		int offset = copyHeader(rin, rout);
+		// Step 1: read the IFDs into a list first
+		readIFDs(null, null, TiffTag.class, list, offset, rin);		
+		// Step 2: remove pages from a multiple page TIFF
+		int pagesRetained = list.size();
+		List<IFD> newList = new ArrayList<IFD>();
+		Arrays.sort(pages);
+		for(int i = pages.length - 1; i >= 0; i--) {
+			if(pages[i] >= 0 && pages[i] < list.size())
+				newList.add(list.get(pages[i])); 
+		}
+		if(newList.size() > 0) {
+			pagesRetained = newList.size();
+			list.retainAll(newList);
+		}
+		// End of removing pages
+		// Reset pageNumber for the existing pages
+		for(int i = 0; i < list.size(); i++) {
+			list.get(i).removeField(TiffTag.PAGE_NUMBER);
+			list.get(i).addField(new ShortField(TiffTag.PAGE_NUMBER.getValue(), new short[]{(short)i, (short)(list.size() - 1)}));
+		}
+		// Step 3: copy the remaining pages
+		// 0x08 is the first write offset
+		int writeOffset = FIRST_WRITE_OFFSET;
+		offset = copyPages(list, writeOffset, rin, rout);
+		int firstIFDOffset = list.get(0).getStartOffset();
+		
+		writeToStream(rout, firstIFDOffset);
+		
+		return pagesRetained;
+	}
+	
+	public static void write(TIFFImage tiffImage, RandomAccessOutputStream rout) throws IOException {
+		RandomAccessInputStream rin = tiffImage.getInputStream();
+		int offset = writeHeader(IOUtils.BIG_ENDIAN, rout);
+		offset = copyPages(tiffImage.getIFDs(), offset, rin, rout);
+		int firstIFDOffset = tiffImage.getIFDs().get(0).getStartOffset();	
+	 
+		writeToStream(rout, firstIFDOffset);
+	}
+	
+	// Return stream offset where to write actual image data or IFD	
+	private static int writeHeader(short endian, RandomAccessOutputStream rout) throws IOException {
+		// Write byte order
+		rout.writeShort(endian);
+		// Set write strategy based on byte order
+		if (endian == IOUtils.BIG_ENDIAN)
+		    rout.setWriteStrategy(WriteStrategyMM.getInstance());
+		else if(endian == IOUtils.LITTLE_ENDIAN)
+		    rout.setWriteStrategy(WriteStrategyII.getInstance());
+		else {
+			throw new RuntimeException("Invalid TIFF byte order");
+	    }		
+		// Write TIFF identifier
+		rout.writeShort(0x2a);
+		
+		return FIRST_WRITE_OFFSET;
 	}
 		
 	private static void writeToStream(RandomAccessOutputStream rout, int firstIFDOffset) throws IOException {

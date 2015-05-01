@@ -27,8 +27,8 @@ import java.io.OutputStream;
 
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe._8BIM;
-import cafe.io.IOUtils;
-import cafe.string.StringUtils;
+import pixy.io.IOUtils;
+import pixy.string.StringUtils;
 
 public class VersionInfo extends _8BIM {
 	//

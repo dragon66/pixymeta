@@ -1,6 +1,6 @@
 package pixy.meta;
 
-import cafe.util.Reader;
+import pixy.util.Reader;
 
 public interface MetadataReader extends Reader {
 	public void showMetadata();

@@ -5,8 +5,8 @@ import java.io.InputStream;
 
 import pixy.meta.MetadataReader;
 import pixy.meta.icc.ProfileTagTable;
-import cafe.io.IOUtils;
-import cafe.string.StringUtils;
+import pixy.io.IOUtils;
+import pixy.string.StringUtils;
 
 public class ICCProfileReader implements MetadataReader {
 	private ICCProfileHeader header;

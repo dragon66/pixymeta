@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -14,17 +14,16 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
-import pixy.meta.exif.ExifTag;
-import cafe.image.tiff.FieldType;
-import cafe.image.tiff.Tag;
-import cafe.image.tiff.TiffTag;
-import cafe.string.StringUtils;
+import pixy.image.tiff.FieldType;
+import pixy.image.tiff.Tag;
+import pixy.image.tiff.TiffTag;
+import pixy.string.StringUtils;
 
 /**
  * Defines EXIF tags
  *  
  * @author Wen Yu, yuwen_66@yahoo.com
- * @version 1.0 03/13/2015
+ * @version 1.0 06/10/2013
  */
 public enum ExifTag implements Tag {
 	EXPOSURE_TIME("ExposureTime", (short)0x829a),	

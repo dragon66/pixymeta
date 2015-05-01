@@ -32,7 +32,7 @@ import java.util.Map;
 
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 public class IPTC extends Metadata {
 	private IPTCReader reader;

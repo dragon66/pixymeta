@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,7 +15,12 @@
  * ====  =======    =================================================
  * WY    10Apr2015  Moved data loaded checking to ExifReader
  * WY    31Mar2015  Fixed bug with getImageIFD() etc
- * WY    13Mar2015  Initial creation
+ * WY    17Feb2015  Added addImageField() to add TIFF image tag
+ * WY    11Feb2015  Added showMetadata()
+ * WY    03Feb2015  Factored out TiffExif and JpegExif
+ * WY    03Feb2015  Made class abstract
+ * WY    14Jan2015  Moved thumbnail related code to ExifThumbnail
+ * WY    06May2014  Complete rewrite to support adding thumbnail IFD
  */
 
 package pixy.meta.exif;
@@ -25,24 +30,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import pixy.image.tiff.TIFFMeta;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
-import pixy.meta.exif.ExifReader;
-import pixy.meta.exif.ExifTag;
-import pixy.meta.exif.ExifThumbnail;
-import pixy.meta.exif.GPSTag;
-import cafe.image.tiff.FieldType;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.TiffField;
-import cafe.image.tiff.TiffTag;
-import cafe.io.IOUtils;
+import pixy.image.tiff.FieldType;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.TIFFMeta;
+import pixy.image.tiff.TiffField;
+import pixy.image.tiff.TiffTag;
+import pixy.io.IOUtils;
 
 /**
  * EXIF wrapper
  *  
  * @author Wen Yu, yuwen_66@yahoo.com
- * @version 1.0 03/13/2014
+ * @version 1.0 01/08/2014
  */
 public abstract class Exif extends Metadata {
 	protected IFD imageIFD;
@@ -114,9 +115,9 @@ public abstract class Exif extends Metadata {
 	public IFD getImageIFD() {
 		if(imageIFD != null) {
 			return new IFD(imageIFD);
-		} else if(reader != null) {
+		} else if (reader != null) {
 			return reader.getImageIFD();
-		}		
+		}			
 		return null;		
 	}
 	
@@ -125,7 +126,7 @@ public abstract class Exif extends Metadata {
 			return new IFD(exifSubIFD);
 		} else if (reader != null) {
 			return reader.getExifIFD();
-		}		
+		}			
 		return null;
 	}
 	
@@ -134,8 +135,8 @@ public abstract class Exif extends Metadata {
 			return new IFD(gpsSubIFD);
 		} else if (reader != null) {
 			return reader.getGPSIFD();
-		}			
-		return null;		
+		}	
+		return null;
 	}
 	
 	public ExifReader getReader() {

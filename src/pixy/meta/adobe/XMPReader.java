@@ -23,7 +23,7 @@ import java.io.IOException;
 import org.w3c.dom.Document;
 
 import pixy.meta.MetadataReader;
-import cafe.string.XMLUtils;
+import pixy.string.XMLUtils;
 
 public class XMPReader implements MetadataReader {
 	private byte[] data;

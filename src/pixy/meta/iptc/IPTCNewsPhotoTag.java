@@ -16,7 +16,7 @@ import java.util.Map;
 
 import pixy.meta.iptc.IPTCNewsPhotoTag;
 import pixy.meta.iptc.IPTCTag;
-import cafe.string.StringUtils;
+import pixy.string.StringUtils;
 
 /**
  * Defines DataSet tags for IPTC NewsPhoto Record - Record number 3.

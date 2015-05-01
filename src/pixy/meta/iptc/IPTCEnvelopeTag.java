@@ -16,7 +16,7 @@ import java.util.Map;
 
 import pixy.meta.iptc.IPTCEnvelopeTag;
 import pixy.meta.iptc.IPTCTag;
-import cafe.string.StringUtils;
+import pixy.string.StringUtils;
 
 /**
  * Defines DataSet tags for IPTC Envelope Record - Record number 1.

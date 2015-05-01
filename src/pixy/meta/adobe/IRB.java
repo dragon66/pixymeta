@@ -28,7 +28,7 @@ import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.IRBReader;
 import pixy.meta.adobe._8BIM;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 public class IRB extends Metadata {
 	private IRBReader reader;

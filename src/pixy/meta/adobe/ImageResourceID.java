@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pixy.meta.adobe.ImageResourceID;
-import cafe.string.StringUtils;
+import pixy.string.StringUtils;
 
 /**
  * Defines Image Resource IDs for Adobe Image Resource Block (IRB)

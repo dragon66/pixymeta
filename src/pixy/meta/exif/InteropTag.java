@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,17 +13,16 @@ package pixy.meta.exif;
 import java.util.HashMap;
 import java.util.Map;
 
-import pixy.meta.exif.InteropTag;
-import cafe.image.tiff.FieldType;
-import cafe.image.tiff.Tag;
-import cafe.image.tiff.TiffTag;
-import cafe.string.StringUtils;
+import pixy.image.tiff.FieldType;
+import pixy.image.tiff.Tag;
+import pixy.image.tiff.TiffTag;
+import pixy.string.StringUtils;
 
 /**
  * Defines Interoperability tags
  *  
  * @author Wen Yu, yuwen_66@yahoo.com
- * @version 1.0 03/13/2015
+ * @version 1.0 03/26/2014
  */
 public enum InteropTag implements Tag {
 	// EXIF InteropSubIFD tags

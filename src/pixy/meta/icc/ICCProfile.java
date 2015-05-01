@@ -24,7 +24,7 @@ import java.io.InputStream;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.icc.ICCProfileReader;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 /**
  * International Color Consortium Profile (ICC Profile)

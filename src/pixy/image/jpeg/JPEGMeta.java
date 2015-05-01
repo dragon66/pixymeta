@@ -44,28 +44,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import cafe.image.ImageIO;
-import cafe.image.ImageType;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.TiffTag;
-import cafe.image.util.IMGUtils;
-import cafe.image.writer.ImageWriter;
-import cafe.image.jpeg.Component;
-import cafe.image.jpeg.DHTReader;
-import cafe.image.jpeg.DQTReader;
-import cafe.image.jpeg.HTable;
-import cafe.image.jpeg.Marker;
-import cafe.image.jpeg.QTable;
-import cafe.image.jpeg.SOFReader;
-import cafe.image.jpeg.SOSReader;
-import cafe.image.jpeg.Segment;
-import cafe.io.FileCacheRandomAccessInputStream;
-import cafe.io.IOUtils;
-import cafe.io.RandomAccessInputStream;
-import cafe.string.Base64;
-import cafe.string.StringUtils;
-import cafe.string.XMLUtils;
-import cafe.util.ArrayUtils;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.TiffTag;
+import pixy.image.jpeg.Component;
+import pixy.image.jpeg.DHTReader;
+import pixy.image.jpeg.DQTReader;
+import pixy.image.jpeg.HTable;
+import pixy.image.jpeg.Marker;
+import pixy.image.jpeg.QTable;
+import pixy.image.jpeg.SOFReader;
+import pixy.image.jpeg.SOSReader;
+import pixy.image.jpeg.Segment;
+import pixy.io.FileCacheRandomAccessInputStream;
+import pixy.io.IOUtils;
+import pixy.io.RandomAccessInputStream;
+import pixy.string.Base64;
+import pixy.string.StringUtils;
+import pixy.string.XMLUtils;
+import pixy.util.ArrayUtils;
+import pixy.util.MetadataUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -362,15 +359,10 @@ public class JPEGMeta {
 									
 								WritableRaster raster = Raster.createInterleavedRaster(db, thumbnailWidth, thumbnailHeight, 3*thumbnailWidth, numOfBands, off, null);
 								ColorModel cm = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), false, false, trans, DataBuffer.TYPE_BYTE);
-						   		BufferedImage bi = new BufferedImage(cm, raster, false, null);
-								// Create a new writer to write the image
-								ImageWriter writer = ImageIO.getWriter(ImageType.JPG);
-								FileOutputStream fout = new FileOutputStream(outpath + ".jpg");
-								try {
-									writer.write(bi, fout);
-								} catch (Exception e) {
-									e.printStackTrace();
-								}
+						   		BufferedImage bi = new BufferedImage(cm, raster, false, null);							
+						   		FileOutputStream fout = new FileOutputStream(outpath + ".jpg");								
+						   		MetadataUtils.saveAsJPEG(bi, fout, 100);
+								
 								fout.close();		
 					    	}
 					    }
@@ -429,12 +421,7 @@ public class JPEGMeta {
 								if(thumbnail.getDataType() == IRBThumbnail.DATA_TYPE_KJpegRGB) {
 									fout.write(thumbnail.getCompressedImage());
 								} else {
-									ImageWriter writer = ImageIO.getWriter(ImageType.JPG);
-									try {
-										writer.write(thumbnail.getRawImage(), fout);
-									} catch (Exception e) {
-										throw new IOException("Writing thumbnail failed!");
-									}
+									MetadataUtils.saveAsJPEG(thumbnail.getRawImage(), fout, 100);
 								}
 								fout.close();								
 							}							
@@ -471,7 +458,7 @@ public class JPEGMeta {
 		if(exif.isThumbnailRequired() && !exif.containsThumbnail()) {
 			is = new FileCacheRandomAccessInputStream(is);
 			// Insert thumbnail into EXIF wrapper
-			exif.setThumbnailImage(IMGUtils.createThumbnail(is));
+			exif.setThumbnailImage(MetadataUtils.createThumbnail(is));
 		}
 		Exif oldExif = null;
 		int oldExifIndex = -1;

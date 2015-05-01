@@ -25,12 +25,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import cafe.image.ImageIO;
-import cafe.image.ImageParam;
-import cafe.image.ImageType;
-import cafe.image.options.JPEGOptions;
-import cafe.image.writer.ImageWriter;
 import pixy.meta.Thumbnail;
+import pixy.util.MetadataUtils;
 
 /** 
  * Photoshop Image Resource Block thumbnail wrapper.
@@ -65,21 +61,7 @@ public class IRBThumbnail extends Thumbnail {
 		} else if(getDataType() == Thumbnail.DATA_TYPE_KRawRGB) {
 			BufferedImage thumbnail = getRawImage();
 			if(thumbnail == null) throw new IllegalArgumentException("Expected raw data thumbnail does not exist!");
-			// Create a JPEGWriter to write the image
-			ImageWriter jpgWriter = ImageIO.getWriter(ImageType.JPG);
-			// Create a ImageParam builder
-			ImageParam.ImageParamBuilder builder = new ImageParam.ImageParamBuilder();
-			// Create JPEGOptions		
-			JPEGOptions jpegOptions = new JPEGOptions();			
-			jpegOptions.setQuality(writeQuality);
-			builder.imageOptions(jpegOptions);
-			// Set ImageParam to the writer
-			jpgWriter.setImageParam(builder.build());					
-			try {
-				jpgWriter.write(thumbnail, os);
-			} catch (Exception e) {
-				throw new RuntimeException("Unable to compress thumbnail as JPEG");
-			}			
+			MetadataUtils.saveAsJPEG(thumbnail, os, writeQuality);
 		}
 	}
  }

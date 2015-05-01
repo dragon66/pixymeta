@@ -29,9 +29,9 @@ import org.w3c.dom.Node;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.image.ImageMetadata;
-import cafe.io.IOUtils;
-import cafe.image.bmp.BmpCompression;
-import static cafe.string.XMLUtils.*;
+import pixy.io.IOUtils;
+import pixy.image.bmp.BmpCompression;
+import static pixy.string.XMLUtils.*;
 
 /**
  * BMP image tweaking tool

@@ -21,7 +21,7 @@ package pixy.meta.adobe;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 public class JPEGQuality extends _8BIM {
 	public enum Format {

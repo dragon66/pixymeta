@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,9 +12,11 @@
  * ExifReader.java
  *
  * Who   Date       Description
- * ====  =========  =================================================
+ * ====  =========  =================================================================
  * WY    13Apr2015  Removed unused constructor, cleaned up read()
- * WY    13Mar2015  Initial creation
+ * WY    27Feb2015  Fixed bug for missing TIFF JPEG_INTERCHANGE_FORMAT tag
+ * WY    06Feb2015  Moved showIFDs() and showIFD() to TIFFTweaker and renamed them to
+ *                  printIFDs() and printIFD()
  */
 
 package pixy.meta.exif;
@@ -27,19 +29,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import pixy.image.tiff.TIFFMeta;
 import pixy.meta.MetadataReader;
 import pixy.meta.Thumbnail;
-import pixy.meta.exif.ExifThumbnail;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.TIFFTweaker;
-import cafe.image.tiff.TiffField;
-import cafe.image.tiff.TiffTag;
-import cafe.io.FileCacheRandomAccessInputStream;
-import cafe.io.FileCacheRandomAccessOutputStream;
-import cafe.io.IOUtils;
-import cafe.io.RandomAccessInputStream;
-import cafe.io.RandomAccessOutputStream;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.TIFFMeta;
+import pixy.image.tiff.TiffField;
+import pixy.image.tiff.TiffTag;
+import pixy.io.FileCacheRandomAccessInputStream;
+import pixy.io.FileCacheRandomAccessOutputStream;
+import pixy.io.IOUtils;
+import pixy.io.RandomAccessInputStream;
+import pixy.io.RandomAccessOutputStream;
 
 public class ExifReader implements MetadataReader {
 	private boolean loaded;
@@ -133,7 +133,7 @@ public class ExifReader implements MetadataReader {
 	}
 	
 	@Override
-	public void read() throws IOException {
+	public void read() throws IOException {		
 		RandomAccessInputStream exifIn = new FileCacheRandomAccessInputStream(new ByteArrayInputStream(data));
     	TIFFMeta.readIFDs(ifds, exifIn);		
 	    // We have thumbnail IFD
@@ -165,14 +165,14 @@ public class ExifReader implements MetadataReader {
 	    			 exifIn.seek(0);
 	    			 ByteArrayOutputStream bout = new ByteArrayOutputStream();
 	    			 RandomAccessOutputStream tiffout = new FileCacheRandomAccessOutputStream(bout);
-	    			 TIFFTweaker.retainPages(exifIn, tiffout, 1);
+	    			 TIFFMeta.retainPages(exifIn, tiffout, 1);
 	    			 tiffout.close(); // Auto flush when closed
 	    			 thumbnail = new ExifThumbnail(width, height, Thumbnail.DATA_TYPE_TIFF, bout.toByteArray(), thumbnailIFD);
 	    			 containsThumbnail = true;		    			    
 	    		}
 	    	}
 	    }
-	    exifIn.close();
+	    exifIn.close();		
 	    loaded = true;
 	}
 	

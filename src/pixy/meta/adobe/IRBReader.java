@@ -32,8 +32,8 @@ import pixy.meta.adobe.JPEGQuality;
 import pixy.meta.adobe.IPTC_NAA;
 import pixy.meta.adobe.VersionInfo;
 import pixy.meta.adobe._8BIM;
-import cafe.io.IOUtils;
-import cafe.util.ArrayUtils;
+import pixy.io.IOUtils;
+import pixy.util.ArrayUtils;
 
 /**
  * Photoshop Image Resource Block reader

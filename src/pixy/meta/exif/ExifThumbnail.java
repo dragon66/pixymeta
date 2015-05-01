@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 by Wen Yu.
+ * Copyright (c) 2014-2015 by Wen Yu.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,12 @@
  *
  * ExifThumbnail.java
  *
- * Who   Date         Description
- * ====  ==========   ===============================================
- * WY    27Apr2015    Added copy constructor
- * WY    10Apr2015    Added new constructor, changed write()
- * WY    09Apr2015    Moved setWriteQuality() to super class
- * WY    13Mar2015    initial creation
+ * Who   Date       Description
+ * ====  =========  =================================================
+ * WY    27Apr2015  Added copy constructor
+ * WY    10Apr2015  Added new constructor, changed write()
+ * WY    09Apr2015  Moved setWriteQuality() to super class
+ * WY    14Jan2015  initial creation
  */
 
 package pixy.meta.exif;
@@ -29,31 +29,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pixy.meta.Thumbnail;
-import cafe.image.ImageIO;
-import cafe.image.ImageParam;
-import cafe.image.ImageType;
-import cafe.image.options.JPEGOptions;
-import cafe.image.tiff.IFD;
-import cafe.image.tiff.LongField;
-import cafe.image.tiff.RationalField;
-import cafe.image.tiff.ShortField;
-import cafe.image.tiff.TIFFTweaker;
-import cafe.image.tiff.TiffField;
-import cafe.image.tiff.TiffFieldEnum;
-import cafe.image.tiff.TiffTag;
-import cafe.image.writer.ImageWriter;
-import cafe.io.FileCacheRandomAccessInputStream;
-import cafe.io.MemoryCacheRandomAccessOutputStream;
-import cafe.io.RandomAccessInputStream;
-import cafe.io.RandomAccessOutputStream;
+import pixy.util.MetadataUtils;
+import pixy.image.tiff.IFD;
+import pixy.image.tiff.LongField;
+import pixy.image.tiff.RationalField;
+import pixy.image.tiff.ShortField;
+import pixy.image.tiff.TIFFMeta;
+import pixy.image.tiff.TiffField;
+import pixy.image.tiff.TiffFieldEnum;
+import pixy.image.tiff.TiffTag;
+import pixy.io.FileCacheRandomAccessInputStream;
+import pixy.io.MemoryCacheRandomAccessOutputStream;
+import pixy.io.RandomAccessInputStream;
+import pixy.io.RandomAccessOutputStream;
 
 /**
  * Encapsulates image EXIF thumbnail metadata
  *  
  * @author Wen Yu, yuwen_66@yahoo.com
- * @version 1.0 03/13/2015
+ * @version 1.0 01/08/2014
  */
-
 public class ExifThumbnail extends Thumbnail {
 	// Comprised of an IFD and an associated image
 	// Create thumbnail IFD (IFD1 in the case of JPEG EXIF segment)
@@ -104,7 +99,7 @@ public class ExifThumbnail extends Thumbnail {
 			// Read the IFDs into a list first
 			List<IFD> list = new ArrayList<IFD>();			   
 			RandomAccessInputStream tiffIn = new FileCacheRandomAccessInputStream(new ByteArrayInputStream(getCompressedImage()));
-			TIFFTweaker.readIFDs(list, tiffIn);
+			TIFFMeta.readIFDs(list, tiffIn);
 			TiffField<?> stripOffset = list.get(0).getField(TiffTag.STRIP_OFFSETS);
     		if(stripOffset == null) 
     			stripOffset = list.get(0).getField(TiffTag.TILE_OFFSETS);
@@ -155,24 +150,10 @@ public class ExifThumbnail extends Thumbnail {
 			// Write the thumbnail IFD
 			// This line is very important!!!
 			randOS.seek(thumbnailIFD.write(randOS, offset));
-			// Create a JPEGWriter to write the image
-			ImageWriter jpgWriter = ImageIO.getWriter(ImageType.JPG);
-			// Create a ImageParam builder
-			ImageParam.ImageParamBuilder builder = new ImageParam.ImageParamBuilder();
-			// Create JPEGOptions		
-			JPEGOptions jpegOptions = new JPEGOptions();			
-			jpegOptions.setQuality(writeQuality);
-			builder.imageOptions(jpegOptions);
-			// Set ImageParam to the writer
-			jpgWriter.setImageParam(builder.build());
 			// This is amazing. We can actually keep track of how many bytes have been written to
 			// the underlying stream by JPEGWriter
 			long startOffset = randOS.getStreamPointer();
-			try {
-				jpgWriter.write(thumbnail, randOS);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			MetadataUtils.saveAsJPEG(thumbnail, randOS, writeQuality);
 			long finishOffset = randOS.getStreamPointer();			
 			int totalOut = (int)(finishOffset - startOffset);
 			// Update fields

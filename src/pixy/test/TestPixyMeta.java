@@ -28,10 +28,10 @@ import pixy.meta.exif.TiffExif;
 import pixy.meta.iptc.IPTCApplicationTag;
 import pixy.meta.iptc.IPTCDataSet;
 import pixy.meta.iptc.IPTCRecord;
-import cafe.image.tiff.FieldType;
-import cafe.image.tiff.TiffTag;
-import cafe.image.util.IMGUtils;
-import cafe.string.XMLUtils;
+import pixy.image.tiff.FieldType;
+import pixy.image.tiff.TiffTag;
+import pixy.util.MetadataUtils;
+import pixy.string.XMLUtils;
 
 public class TestPixyMeta {
 
@@ -164,7 +164,7 @@ public class TestPixyMeta {
 			e.printStackTrace();
 		}
 		
-		BufferedImage thumbnail = IMGUtils.createThumbnail(fin);
+		BufferedImage thumbnail = MetadataUtils.createThumbnail(fin);
 		
 		fin.close();
 		

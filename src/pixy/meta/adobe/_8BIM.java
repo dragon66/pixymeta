@@ -22,8 +22,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import pixy.meta.adobe.ImageResourceID;
-import cafe.io.IOUtils;
-import cafe.string.StringUtils;
+import pixy.io.IOUtils;
+import pixy.string.StringUtils;
 
 public class _8BIM {
 	private short id;

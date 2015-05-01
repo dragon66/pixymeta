@@ -29,7 +29,7 @@ import java.util.Map;
 
 import pixy.meta.MetadataReader;
 import pixy.meta.iptc.IPTCDataSet;
-import cafe.io.IOUtils;
+import pixy.io.IOUtils;
 
 /**
  * IPTC image metadata reader

@@ -40,14 +40,14 @@ import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.XMP;
 import pixy.meta.icc.ICCProfile;
-import cafe.image.png.Chunk;
-import cafe.image.png.ChunkType;
-import cafe.image.png.ICCPBuilder;
-import cafe.image.png.TextBuilder;
-import cafe.image.png.TextReader;
-import cafe.image.png.UnknownChunk;
-import cafe.io.IOUtils;
-import cafe.string.XMLUtils;
+import pixy.image.png.Chunk;
+import pixy.image.png.ChunkType;
+import pixy.image.png.ICCPBuilder;
+import pixy.image.png.TextBuilder;
+import pixy.image.png.TextReader;
+import pixy.image.png.UnknownChunk;
+import pixy.io.IOUtils;
+import pixy.string.XMLUtils;
 /**
  * PNG image tweaking tool
  *

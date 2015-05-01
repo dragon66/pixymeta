@@ -5,11 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import pixy.meta.NativeMetadata;
-import cafe.image.jpeg.JPEGTweaker;
-import cafe.image.jpeg.Segment;
-import cafe.io.IOUtils;
-import cafe.string.StringUtils;
-import cafe.util.ArrayUtils;
+import pixy.image.jpeg.JPEGMeta;
+import pixy.image.jpeg.Segment;
+import pixy.io.IOUtils;
+import pixy.string.StringUtils;
+import pixy.util.ArrayUtils;
 
 /**
  * JPEG native image metadata
@@ -62,7 +62,7 @@ public class JPGNativeMetadata extends NativeMetadata<Segment> {
 		if (data.length >= expectedLen) { 
 			byte[] buf = ArrayUtils.subArray(data, 0, 5);
 			
-			if(Arrays.equals(buf, JPEGTweaker.ADOBE_ID)) {
+			if(Arrays.equals(buf, JPEGMeta.ADOBE_ID)) {
 				for (int i = 0, j = 5; i < 3; i++, j += 2) {
 					System.out.println(app14Info[i] + StringUtils.shortToHexStringMM(IOUtils.readShortMM(data, j)));
 				}
@@ -73,9 +73,9 @@ public class JPGNativeMetadata extends NativeMetadata<Segment> {
 	}
 	
 	private static void readAPP0(byte[] data) throws IOException {
-		int i = JPEGTweaker.JFIF_ID.length;
+		int i = JPEGMeta.JFIF_ID.length;
 	    // JFIF segment
-	    if(Arrays.equals(ArrayUtils.subArray(data, 0, i), JPEGTweaker.JFIF_ID) || Arrays.equals(ArrayUtils.subArray(data, 0, i), JPEGTweaker.JFXX_ID)) {
+	    if(Arrays.equals(ArrayUtils.subArray(data, 0, i), JPEGMeta.JFIF_ID) || Arrays.equals(ArrayUtils.subArray(data, 0, i), JPEGMeta.JFXX_ID)) {
 	    	System.out.print(new String(data, 0, i).trim());
 	    	System.out.println(" - version " + (data[i++]&0xff) + "." + (data[i++]&0xff));
 	    	System.out.print("Density unit: ");
@@ -108,10 +108,10 @@ public class JPGNativeMetadata extends NativeMetadata<Segment> {
 		// or Adobe PhotoShop to store Save for Web data - called Ducky segment.
 		String[] duckyInfo = {"Ducky", "Photoshop Save For Web Quality: ", "Comment: ", "Copyright: "};
 		int currPos = 0;
-		byte[] buf = ArrayUtils.subArray(data, 0, JPEGTweaker.DUCKY_ID.length);
-		currPos += JPEGTweaker.DUCKY_ID.length;
+		byte[] buf = ArrayUtils.subArray(data, 0, JPEGMeta.DUCKY_ID.length);
+		currPos += JPEGMeta.DUCKY_ID.length;
 		
-		if(Arrays.equals(JPEGTweaker.DUCKY_ID, buf)) {
+		if(Arrays.equals(JPEGMeta.DUCKY_ID, buf)) {
 			System.out.println("=>" + duckyInfo[0]);
 			short tag = IOUtils.readShortMM(data, currPos);
 			currPos += 2;
@@ -147,7 +147,7 @@ public class JPGNativeMetadata extends NativeMetadata<Segment> {
 			}			
 		} else {
 			buf = ArrayUtils.subArray(data, 0, 10);
-			if (Arrays.equals(JPEGTweaker.PICTURE_INFO_ID, buf)) {
+			if (Arrays.equals(JPEGMeta.PICTURE_INFO_ID, buf)) {
 				// TODO process PictureInfo.
 			}
 		}
