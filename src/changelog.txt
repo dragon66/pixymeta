@@ -1,5 +1,5 @@
 ***************************
-Last modified on 04/29/2015
+Last modified on 05/01/2015
 ***************************
 01May2015  Became a stand-alone library
 29Apr2015  Renamed XMLUtils findAttribute() to getAttribute()
