@@ -26,5 +26,3 @@ Image metadata manipulation:
    * In case of JPEG, handle normal XMP and extendedXMP which cannot fit into one APP1 segment
 
 This is the meta data related part branched out from icafe repository.
-
-[Project using pixymeta](https://github.com/creativecommons/seneca)
