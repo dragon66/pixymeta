@@ -25,8 +25,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import pixy.meta.adobe.ImageResourceID;
-import pixy.meta.adobe._8BIM;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import pixy.io.IOUtils;
 import pixy.string.StringUtils;
 
@@ -37,6 +38,9 @@ public class VersionInfo extends _8BIM {
 	private String writerName;
 	private String readerName;
 	private int fileVersion;
+	
+	// Obtain a logger instance
+	private static final Logger LOGGER = LoggerFactory.getLogger(VersionInfo.class);
 	
 	public VersionInfo() {
 		this("VersionInfo");
@@ -102,11 +106,11 @@ public class VersionInfo extends _8BIM {
 	
 	public void print() {
 		super.print();
-		System.out.println("Version: " + getVersion());
-		System.out.println("Has Real Merged Data: " + hasRealMergedData);
-        System.out.println("Writer name: " + writerName);
-		System.out.println("Reader name: " + readerName);
-		System.out.println("File Version: " + getFileVersion()); 
+		LOGGER.info("Version: {}", getVersion());
+		LOGGER.info("Has Real Merged Data: {}", hasRealMergedData);
+        LOGGER.info("Writer name: {}", writerName);
+		LOGGER.info("Reader name: {}", readerName);
+		LOGGER.info("File Version: {}", getFileVersion()); 
 	}
 
 	public void setHasRealMergedData(boolean hasRealMergedData) {

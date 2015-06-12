@@ -13,6 +13,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import pixy.image.jpeg.JPEGMeta;
@@ -34,19 +36,22 @@ import pixy.util.MetadataUtils;
 import pixy.string.XMLUtils;
 
 public class TestPixyMeta {
-
+	// Obtain a logger instance
+	private static final Logger LOGGER = LoggerFactory.getLogger(TestPixyMeta.class);
+		
 	public static void main(String[] args) throws IOException {
 		Map<MetadataType, Metadata> metadataMap = Metadata.readMetadata(args[0]);
-		System.out.println("Start of metadata information:");
-		System.out.println("Total number of metadata entries: " + metadataMap.size());
+		LOGGER.info("Start of metadata information:");
+		LOGGER.info("Total number of metadata entries: {}", metadataMap.size());
+		
 		int i = 0;
 		for(Map.Entry<MetadataType, Metadata> entry : metadataMap.entrySet()) {
-			System.out.println("Metadata entry " + i + " - " + entry.getKey());
+			LOGGER.info("Metadata entry {} - {}", i, entry.getKey());
 			entry.getValue().showMetadata();
 			i++;
-			System.out.println("-----------------------------------------");
+			LOGGER.info("-----------------------------------------");
 		}
-		System.out.println("End of metadata information.");
+		LOGGER.info("End of metadata information.");
 	
 		FileInputStream fin = null;
 		FileOutputStream fout = null;

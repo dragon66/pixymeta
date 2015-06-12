@@ -13,7 +13,8 @@ package pixy.meta.icc;
 import java.util.HashMap;
 import java.util.Map;
 
-import pixy.meta.icc.ProfileTag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ICC Profile Tag
@@ -79,6 +80,9 @@ public enum ProfileTag {
 
 	UNKNOWN(TagType.UNKNOWN, 0xFFFFFFFF, "UnknownTag");
 	
+	// Obtain a logger instance
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProfileTag.class);
+
 	public enum TagType { //
 		PUBLIC,
 		PRIVATE,
@@ -111,7 +115,7 @@ public enum ProfileTag {
     public static ProfileTag fromInt(int value) {
        	ProfileTag tag = typeMap.get(value);
     	if (tag == null) {
-    	 System.out.println("tag value 0x" + Integer.toHexString(value) + " unknown");
+    	 LOGGER.warn("tag value 0x{} unknown", Integer.toHexString(value));
     		return UNKNOWN;
     	}
    		return tag;

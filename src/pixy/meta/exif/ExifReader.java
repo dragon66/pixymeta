@@ -29,6 +29,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import pixy.meta.MetadataReader;
 import pixy.meta.Thumbnail;
 import pixy.image.tiff.IFD;
@@ -47,6 +50,9 @@ public class ExifReader implements MetadataReader {
 	private ExifThumbnail thumbnail;
 	private boolean containsThumbnail;
 	private List<IFD> ifds = new ArrayList<IFD>(3);
+	
+	// Obtain a logger instance
+	private static final Logger LOGGER = LoggerFactory.getLogger(ExifReader.class);
 	
 	public ExifReader(byte[] exif) {
 		this.data = exif;
@@ -185,12 +191,12 @@ public class ExifReader implements MetadataReader {
 				e.printStackTrace();
 			}
 		}
-		System.out.println("Exif reader output starts =>");
+		LOGGER.info("Exif reader output starts =>");
 		TIFFMeta.printIFDs(ifds, "");
 		if(containsThumbnail) {
-			System.out.println("Exif thumbnail format: " + (thumbnail.getDataType() == 1? "DATA_TYPE_JPG":"DATA_TYPE_TIFF"));
-			System.out.println("Exif thumbnail data length: " + thumbnail.getCompressedImage().length);
+			LOGGER.info("Exif thumbnail format: {}", (thumbnail.getDataType() == 1? "DATA_TYPE_JPG":"DATA_TYPE_TIFF"));
+			LOGGER.info("Exif thumbnail data length: {}", thumbnail.getCompressedImage().length);
 		}
-		System.out.println("<= Exif reader output ends");
+		LOGGER.info("<= Exif reader output ends");
 	}
 }

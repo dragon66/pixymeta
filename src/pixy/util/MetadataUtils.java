@@ -35,6 +35,9 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import pixy.io.RandomAccessInputStream;
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe._8BIM;
@@ -60,7 +63,10 @@ public class MetadataUtils {
 	private static byte[] PCX = {0x0a};
 	private static byte[] JPG2000 = {0x00, 0x00, 0x00, 0x0C};
 	
-	public static final int IMAGE_MAGIC_NUMBER_LEN = 4; 
+	public static final int IMAGE_MAGIC_NUMBER_LEN = 4;
+	
+	// Obtain a logger instance
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataUtils.class);
 		
 	public static ImageType guessImageType(PushbackInputStream is) throws IOException {
 		// Read the first ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes
@@ -103,7 +109,7 @@ public class MetadataUtils {
 					imageType = ImageType.TGA;					
 			}
 		} else {
-			System.out.println("Unknown format!");		
+			LOGGER.error("Unknown format!");		
 		}
 		
 		return imageType;
