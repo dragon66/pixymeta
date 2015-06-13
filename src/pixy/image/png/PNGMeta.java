@@ -61,7 +61,7 @@ public class PNGMeta {
 	/** PNG signature constant */
     private static final long SIGNATURE = 0x89504E470D0A1A0AL;
 	
- // Obtain a logger instance
+    // Obtain a logger instance
  	private static final Logger LOGGER = LoggerFactory.getLogger(PNGMeta.class);
  	
    	public static void insertChunk(Chunk customChunk, InputStream is, OutputStream os) throws IOException {
