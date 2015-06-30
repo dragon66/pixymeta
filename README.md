@@ -25,4 +25,19 @@ Image metadata manipulation:
    * Extract XMP metadata from JPEG, GIF, PNG, and TIFF image
    * In case of JPEG, handle normal XMP and extendedXMP which cannot fit into one APP1 segment
 
+
+Where can I get the latest release?
+-----------------------------------
+There is currently no stable release of PIXYMETA. However you can pull the latest SNAPSHOT from the Maven snapshot repository by adding the following dependency to your pom.xml:
+
+```xml
+<dependency>
+  <groupId>com.github.dragon66</groupId>
+  <artifactId>pixymeta</artifactId>
+  <version>1.0-SNAPSHOT</version>
+</dependency>
+``` 
+
+Suggestions? custom requirements? email me: yuwen_66@yahoo.com
+
 This is the meta data related part branched out from icafe repository.
