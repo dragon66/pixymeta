@@ -54,6 +54,9 @@ Then you can use the SNAPSHOT version of PIXYMETA in your pom.xml:
 </dependency>
 ``` 
 
-Suggestions? custom requirements? email me: yuwen_66@yahoo.com
 
-This is the meta data related part branched out from icafe repository.
+Go to the [wiki] page to see this library in action or grab the "pixymeta.jar" from the lib folder and try it yourself!
+
+[wiki]:https://github.com/dragon66/pixymeta/wiki
+
+Suggestions? custom requirements? email me: yuwen_66@yahoo.com
