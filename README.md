@@ -1,5 +1,6 @@
 # pixymeta
 Java image metadata CRUD tool - a pure Java image metadata manipulation tool.
+This is the meta data related part branched out from icafe repository.
 
 Image metadata manipulation:
 ----------------------------------------
