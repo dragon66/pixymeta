@@ -1,6 +1,7 @@
 ***************************
-Last modified on 06/12/2015
+Last modified on 07/01/2015
 ***************************
+01Jul2015  Added support for non-standard XMP identifier
 12Jun2015  Replaced console output with slf4j logging
 01May2015  Became a stand-alone library
 29Apr2015  Renamed XMLUtils findAttribute() to getAttribute()
