@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =======    ==========================================================
+ * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    02Jul2015  Added support for APP14 segment reading
  * WY    02Jul2015  Added support for APP12 segment reading
  * WY    01Jul2015  Added support for non-standard XMP identifier
@@ -27,7 +28,7 @@
  * WY    13Mar2015  initial creation
  */
 
-package pixy.image.jpeg;
+package pixy.meta.jpeg;
 
 import java.awt.Transparency;
 import java.awt.color.ColorSpace;
@@ -83,8 +84,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import pixy.meta.jpeg.APP14Segment;
-import pixy.meta.jpeg.APP12Segment;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.Thumbnail;
@@ -1012,6 +1011,19 @@ public class JPEGMeta {
 				}
 			}
 	    }
+	}
+	
+	/**
+	 * Insert a XMP instance into the image. 
+	 * The XMP instance must be able to fit into one APP1.
+	 * 
+	 * @param is InputStream for the image.
+	 * @param os OutputStream for the image.
+	 * @param xmp XMP instance
+	 * @throws IOException
+	 */
+	public static void insertXMP(InputStream is, OutputStream os, XMP xmp) throws IOException {
+		insertXMP(is, os, xmp.getData(), null, null);
 	}
 	
 	/**

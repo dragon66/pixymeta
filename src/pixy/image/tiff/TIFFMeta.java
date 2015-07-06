@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  ==========================================================
+ * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    21Jun2015  Removed copyright notice from generated TIFF images
  * WY    15Apr2015  Changed the argument type for insertIPTC() and insertIRB()
  * WY    07Apr2015  Removed insertICCProfile() AWT related code
@@ -865,6 +866,14 @@ public class TIFFMeta {
 		if(thumbnail == null) throw new IllegalArgumentException("Input thumbnail is null");
 		_8BIM bim = new ThumbnailResource(thumbnail);
 		insertIRB(rin, rout, Arrays.asList(bim), true);
+	}
+	
+	public static void insertXMP(XMP xmp, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
+		insertXMP(xmp.getData(), rin, rout);
+	}
+	
+	public static void insertXMP(XMP xmp, int pageNumber, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
+		insertXMP(xmp.getData(), pageNumber, rin, rout);
 	}
 	
 	public static void insertXMP(byte[] xmp, RandomAccessInputStream rin, RandomAccessOutputStream rout) throws IOException {
