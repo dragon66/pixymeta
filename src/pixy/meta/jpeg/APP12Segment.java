@@ -40,13 +40,13 @@ public class APP12Segment extends Metadata {
 	private static final Logger LOGGER = LoggerFactory.getLogger(APP12Segment.class);
 		
 	public APP12Segment() {
-		super(MetadataType.JPG_APP12, null);
+		super(MetadataType.JPG_DUCKY, null);
 		datasetMap =  new EnumMap<APP12Tag, APP12DataSet>(APP12Tag.class);
 		isDataRead = true;
 	}
 	
 	public APP12Segment(byte[] data) {
-		super(MetadataType.JPG_APP12, data);
+		super(MetadataType.JPG_DUCKY, data);
 	}
 	
 	public void addDataSet(APP12DataSet dataSet) {

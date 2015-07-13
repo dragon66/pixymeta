@@ -39,12 +39,12 @@ public class APP14Segment extends Metadata {
 	private int m_ColorTransform;
 	
 	public APP14Segment(byte[] data) {
-		super(MetadataType.JPG_APP14, data);
+		super(MetadataType.JPG_ADOBE, data);
 		ensureDataRead();
 	}
 	
 	public APP14Segment(int dctEncodeVersion, int app14Flags0, int app14Flags1, int colorTransform) {
-		super(MetadataType.JPG_APP14, null);
+		super(MetadataType.JPG_ADOBE, null);
 		this.m_DCTEncodeVersion = dctEncodeVersion;
 		this.m_APP14Flags0 = app14Flags0;
 		this.m_APP14Flags1 = app14Flags1;
@@ -99,7 +99,6 @@ public class APP14Segment extends Metadata {
 		LOGGER.info("ColorTransform: {}", (m_ColorTransform <= 2)?colorTransform[m_ColorTransform]:m_ColorTransform);
 		LOGGER.info("<= JPEG APP14Segment output ends");
 	}
-
 
 	public void write(OutputStream os) throws IOException {
 		ensureDataRead();
