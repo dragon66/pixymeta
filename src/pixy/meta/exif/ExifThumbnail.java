@@ -29,12 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pixy.meta.Thumbnail;
+import pixy.meta.tiff.TIFFMeta;
 import pixy.util.MetadataUtils;
 import pixy.image.tiff.IFD;
 import pixy.image.tiff.LongField;
 import pixy.image.tiff.RationalField;
 import pixy.image.tiff.ShortField;
-import pixy.image.tiff.TIFFMeta;
 import pixy.image.tiff.TiffField;
 import pixy.image.tiff.TiffFieldEnum;
 import pixy.image.tiff.TiffTag;
