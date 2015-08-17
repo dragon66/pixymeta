@@ -59,5 +59,5 @@ Then you can use the SNAPSHOT version of PIXYMETA in your pom.xml:
 Go to the [wiki] page to see this library in action or grab the "pixymeta.jar" from the lib folder and try it yourself!
 
 [wiki]:https://github.com/dragon66/pixymeta/wiki
-
+[Open]:https://github.com/dragon66/pixymeta/issues/new
 Suggestions? custom requirements? [Open] an issue or send mail to me directly: yuwen_66@yahoo.com
