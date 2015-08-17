@@ -60,4 +60,4 @@ Go to the [wiki] page to see this library in action or grab the "pixymeta.jar" f
 
 [wiki]:https://github.com/dragon66/pixymeta/wiki
 [Open]:https://github.com/dragon66/pixymeta/issues/new
-Suggestions? custom requirements? [Open] an issue or send mail to me directly: yuwen_66@yahoo.com
+Suggestions? custom requirements? [Open] an issue or send email to me directly: yuwen_66@yahoo.com
