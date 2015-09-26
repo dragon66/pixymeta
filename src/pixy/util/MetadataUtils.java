@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PushbackInputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -38,6 +37,7 @@ import javax.imageio.stream.ImageOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import pixy.io.PeekHeadInputStream;
 import pixy.io.RandomAccessInputStream;
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe._8BIM;
@@ -68,13 +68,11 @@ public class MetadataUtils {
 	// Obtain a logger instance
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataUtils.class);
 		
-	public static ImageType guessImageType(PushbackInputStream is) throws IOException {
+	public static ImageType guessImageType(PeekHeadInputStream is) throws IOException {
 		// Read the first ImageIO.IMAGE_MAGIC_NUMBER_LEN bytes
-		byte[] magicNumber = new byte[IMAGE_MAGIC_NUMBER_LEN];
-		is.read(magicNumber);
+		byte[] magicNumber = is.peek(IMAGE_MAGIC_NUMBER_LEN);
 		ImageType imageType = guessImageType(magicNumber);
-		is.unread(magicNumber);// reset stream pointer
-		
+				
 		return imageType;
 	}
 	
