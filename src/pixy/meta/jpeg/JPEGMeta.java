@@ -650,7 +650,7 @@ public class JPEGMeta {
 	    }
 		// Close the input stream in case it's an instance of RandomAccessInputStream
 		if(is instanceof RandomAccessInputStream)
-			is.close();
+			((FileCacheRandomAccessInputStream)is).shallowClose();
 	}
 	
 	/**

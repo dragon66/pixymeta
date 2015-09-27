@@ -54,6 +54,7 @@ public class MemoryCacheRandomAccessInputStream extends RandomAccessInputStream 
 		super.close();
 		cache.clear();
 		cache = null;
+		src.close();
 		src = null;
 		closed = true;
 	}
@@ -133,12 +134,11 @@ public class MemoryCacheRandomAccessInputStream extends RandomAccessInputStream 
 	}
 
 	@Override
-	public void closeAll() throws IOException {
+	public void shallowClose() throws IOException {
 		if(closed) return;
 		super.close();
 		cache.clear();
 		cache = null;
-		src.close();
 		src = null;
 		closed = true;		
 	}

@@ -121,7 +121,7 @@ public class ExifThumbnail extends Thumbnail {
     				offset += counts[i];    				
     			}
     		}
-    		tiffIn.close();
+    		tiffIn.shallowClose();
     		// Update offset field
 			randOS.seek(stripOffset.getDataOffset());
 			for(int i : off)
@@ -163,6 +163,6 @@ public class ExifThumbnail extends Thumbnail {
 			randOS.writeInt(totalOut);
 		}
 		// Close the RandomAccessOutputStream instance if we created it locally
-		if(!(os instanceof RandomAccessOutputStream)) randOS.close();
+		if(!(os instanceof RandomAccessOutputStream)) randOS.shallowClose();
 	}
 }

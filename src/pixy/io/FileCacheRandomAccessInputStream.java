@@ -176,19 +176,18 @@ public class FileCacheRandomAccessInputStream extends RandomAccessInputStream {
      * @throws IOException if an I/O error occurs.
      */
     public void close() throws IOException {
-    	if(closed) return;
-        cache.close();
-        cacheFile.delete();
-        src = null;
-        closed = true;
-    }
-
-	@Override
-	public void closeAll() throws IOException {
 		if(closed) return;
         cache.close();
         cacheFile.delete();
         src.close();
+        src = null;
+        closed = true;
+    }
+    
+    public void shallowClose() throws IOException {
+    	if(closed) return;
+        cache.close();
+        cacheFile.delete();
         src = null;
         closed = true;
     }
