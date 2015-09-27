@@ -64,14 +64,16 @@ public class PeekHeadInputStream extends InputStream {
 	}
 	
 	public void closeAll() throws IOException {
-		close();
+		if(closed) return;
+		buffer = null;
 		src.close();
 		src = null;
+		closed = true;
 	}
 	
-	 /**
-     * Check to make sure that this stream has not been closed
-     */
+	/**
+	 * Check to make sure that this stream has not been closed
+	 */
     private  void ensureOpen() throws IOException {
     	if (closed)
     		throw new IOException("Stream closed");
