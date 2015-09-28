@@ -108,7 +108,7 @@ public class TestPixyMeta {
 		fin = new FileInputStream("images/exif.tif");
 		fout = new FileOutputStream("exif-exif-inserted.tif");
 		
-		Metadata.insertExif(fin, fout, populateExif(TiffExif.class), true);
+		Metadata.insertExif(fin, fout, populateExif(TiffExif.class), false);
 		
 		fin.close();
 		fout.close();
