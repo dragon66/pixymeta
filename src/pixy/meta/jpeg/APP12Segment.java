@@ -68,7 +68,6 @@ public class APP12Segment extends Metadata {
 		return Collections.unmodifiableMap(datasetMap);
 	}
 	
-	@Override
 	public void read() throws IOException {
 		if(!isDataRead) {
 			int i = 0;
