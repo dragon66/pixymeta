@@ -29,8 +29,7 @@
 		<copy includeemptydirs="false" todir="build/classes">
             <fileset dir="src">
                 <include name="*"/>
-                <include name="resources/CMYK Profiles/USWebUncoated.icc"/>
-            </fileset>
+             </fileset>
         </copy>
 	</target>
 	<target name="clean">
