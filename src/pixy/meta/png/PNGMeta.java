@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  =================================================
+ * WY    30Mar2016  Added insertTextChunk()
  * WY    30Mar2016  Changed XMP trailing pi to "end='r'"
  * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    30Mar2015  Added insertICCProfile()
@@ -42,7 +43,6 @@ import org.w3c.dom.Document;
 
 import pixy.meta.png.TIMEChunk;
 import pixy.image.png.TextBuilder;
-import pixy.meta.png.TextualChunks;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.XMP;
@@ -110,6 +110,18 @@ public class PNGMeta {
   	
   	public static void insertICCProfile(String profile_name, ICC_Profile icc_profile, InputStream is, OutputStream os) throws IOException {
   		insertICCProfile(profile_name, icc_profile.getData(), is, os);
+  	}
+  	
+  	public static void insertTextChunk(ChunkType type, String keyword, String text, InputStream is, OutputStream os) throws IOException {
+  		if(type == null || keyword == null || text == null)
+  			throw new IllegalArgumentException("Argument(s) are null");
+  		
+  		insertChunk(new TextBuilder(type).keyword(keyword).text(text).build(), is, os);
+  	}
+  	
+  	public static void insertTextChunks(TextualChunks textualChunks, InputStream is, OutputStream os) throws IOException {
+  		if(textualChunks == null) throw new IllegalArgumentException("Argument is null");
+  		insertChunks(textualChunks.getChunks(), is, os);
   	}
   	
   	public static void insertXMP(InputStream is, OutputStream os, XMP xmp) throws IOException {
