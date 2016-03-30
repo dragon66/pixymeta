@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =======    ==========================================================
+ * WY    30Mar2016  Rewrite writeComment() to leverage COMBuilder
  * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    02Jul2015  Added support for APP14 segment reading
  * WY    02Jul2015  Added support for APP12 segment reading
@@ -59,6 +60,8 @@ import pixy.image.jpeg.QTable;
 import pixy.image.jpeg.SOFReader;
 import pixy.image.jpeg.SOSReader;
 import pixy.image.jpeg.Segment;
+import pixy.image.jpeg.COMBuilder;
+import pixy.image.jpeg.UnknownSegment;
 import pixy.io.FileCacheRandomAccessInputStream;
 import pixy.io.IOUtils;
 import pixy.io.RandomAccessInputStream;
@@ -644,7 +647,10 @@ public class JPEGMeta {
 					    length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
 					    IOUtils.readFully(is, buf);
-					    segments.add(new Segment(emarker, length, buf));
+					    if(emarker == Marker.UNKNOWN)
+					    	segments.add(new UnknownSegment(marker, length, buf));
+					    else
+					    	segments.add(new Segment(emarker, length, buf));
 					    marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -741,7 +747,10 @@ public class JPEGMeta {
 				    	 length = IOUtils.readUnsignedShortMM(is);					
 				    	 byte[] buf = new byte[length - 2];
 				    	 IOUtils.readFully(is, buf);
-				    	 segments.add(new Segment(emarker, length, buf));
+				    	 if(emarker == Marker.UNKNOWN)
+				    		 segments.add(new UnknownSegment(marker, length, buf));
+				    	 else
+				    		 segments.add(new Segment(emarker, length, buf));
 				    	 marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -865,7 +874,10 @@ public class JPEGMeta {
 				    	length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
 					    IOUtils.readFully(is, buf);
-					    segments.add(new Segment(emarker, length, buf));
+					    if(emarker == Marker.UNKNOWN)
+					    	segments.add(new UnknownSegment(marker, length, buf));
+					    else
+					    	segments.add(new Segment(emarker, length, buf));
 					    marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -955,7 +967,10 @@ public class JPEGMeta {
 				    	length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
 					    IOUtils.readFully(is, buf);
-					    segments.add(new Segment(emarker, length, buf));
+					    if(emarker == Marker.UNKNOWN)
+					    	segments.add(new UnknownSegment(marker, length, buf));
+					    else
+					    	segments.add(new Segment(emarker, length, buf));
 					    marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -1049,7 +1064,10 @@ public class JPEGMeta {
 					    length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
 					    IOUtils.readFully(is, buf);
-					    segments.add(new Segment(emarker, length, buf));
+					    if(emarker == Marker.UNKNOWN)
+					    	segments.add(new UnknownSegment(marker, length, buf));
+					    else
+					    	segments.add(new Segment(emarker, length, buf));
 					    marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -1900,16 +1918,7 @@ public class JPEGMeta {
 	}
 	
 	private static void writeComment(String comment, OutputStream os) throws IOException	{
-		byte[] data = comment.getBytes();
-		int len = data.length + 2;
-		byte[] COM = new byte[len + 2];
-		// Comment marker: 0xfffe
-		COM[0] = (byte)0xff;
-		COM[1] = (byte)0xfe;
-		COM[2] = (byte)((len>>8)&0xff);
-		COM[3] = (byte)(len&0xff);
-		System.arraycopy(data, 0, COM, 4, len-2);
-		os.write(COM, 0, len + 2);
+		new COMBuilder().comment(comment).build().write(os);
 	}
 	
 	/**

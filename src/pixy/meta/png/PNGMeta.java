@@ -13,6 +13,7 @@
  *
  * Who   Date       Description
  * ====  =========  =================================================
+ * WY    30Mar2016  Changed XMP trailing pi to "end='r'"
  * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    30Mar2015  Added insertICCProfile()
  * WY    13Mar2015  Initial creation
@@ -119,7 +120,7 @@ public class PNGMeta {
   	public static void insertXMP(InputStream is, OutputStream os, String xmp) throws IOException {
   		Document doc = XMLUtils.createXML(xmp);
 		XMLUtils.insertLeadingPI(doc, "xpacket", "begin='' id='W5M0MpCehiHzreSzNTczkc9d'");
-		XMLUtils.insertTrailingPI(doc, "xpacket", "end='w'");
+		XMLUtils.insertTrailingPI(doc, "xpacket", "end='r'");
 		String newXmp = XMLUtils.serializeToString(doc); // DONOT use XMLUtils.serializeToStringLS()
   		insert(is, os, newXmp);
     }
@@ -164,7 +165,7 @@ public class PNGMeta {
 
         /** Read header */
         /** We are expecting IHDR */
-        if ((IOUtils.readIntMM(is)!=13)||(IOUtils.readIntMM(is) != ChunkType.IHDR.getValue())) {
+        if ((IOUtils.readIntMM(is) != 13)||(IOUtils.readIntMM(is) != ChunkType.IHDR.getValue())) {
             throw new RuntimeException("Not a valid IHDR chunk.");
         }     
         
@@ -183,7 +184,7 @@ public class PNGMeta {
 	       	} 
        		ChunkType chunkType = ChunkType.fromInt(chunk_type);
        		buf = new byte[data_len];
-       		IOUtils.read(is, buf,0, data_len);
+       		IOUtils.read(is, buf, 0, data_len);
               
        		if (chunkType == ChunkType.UNKNOWN)
        			list.add(new UnknownChunk(data_len, chunk_type, buf, IOUtils.readUnsignedIntMM(is)));
@@ -197,7 +198,7 @@ public class PNGMeta {
    	private static byte[] readICCProfile(byte[] buf) throws IOException {
 		int profileName_len = 0;
 		while(buf[profileName_len] != 0) profileName_len++;
-		String profileName = new String(buf, 0, profileName_len,"UTF-8");
+		String profileName = new String(buf, 0, profileName_len, "UTF-8");
 		
 		InflaterInputStream ii = new InflaterInputStream(new ByteArrayInputStream(buf, profileName_len + 2, buf.length - profileName_len - 2));
 		LOGGER.info("ICCProfile name: {}", profileName);
@@ -267,11 +268,11 @@ public class PNGMeta {
    	 * Removes chunks which have the same ChunkType values from the chunkEnumSet.
    	 * 
    	 * @param chunks a list of chunks to be checked.
-   	 * @param chunkEnumSet a set of ChunkType (better use a HashSet instead of EnumSet for performance).
+   	 * @param chunkTypeSet a set of ChunkType (better use a HashSet instead of EnumSet for performance).
    	 * @return a list of chunks with the specified chunks removed if any.
    	 */
    	
-   	public static List<Chunk> removeChunks(List<Chunk> chunks, Set<ChunkType> chunkEnumSet) {
+   	public static List<Chunk> removeChunks(List<Chunk> chunks, Set<ChunkType> chunkTypeSet) {
   		
   		Iterator<Chunk> iter = chunks.listIterator();
    	
@@ -279,7 +280,7 @@ public class PNGMeta {
    			
    			Chunk chunk = iter.next();
    		
-   			if (chunkEnumSet.contains(chunk.getChunkType())) {   				
+   			if (chunkTypeSet.contains(chunk.getChunkType())) {   				
    				iter.remove();
    			}   			
    		}
