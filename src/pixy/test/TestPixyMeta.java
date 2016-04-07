@@ -20,15 +20,16 @@ import org.w3c.dom.Document;
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.IPTC_NAA;
-import pixy.meta.adobe.XMP;
 import pixy.meta.adobe._8BIM;
 import pixy.meta.exif.Exif;
 import pixy.meta.exif.ExifTag;
-import pixy.meta.exif.JpegExif;
-import pixy.meta.exif.TiffExif;
 import pixy.meta.iptc.IPTCApplicationTag;
 import pixy.meta.iptc.IPTCDataSet;
 import pixy.meta.jpeg.JPEGMeta;
+import pixy.meta.jpeg.JpegExif;
+import pixy.meta.jpeg.JpegXMP;
+import pixy.meta.tiff.TiffExif;
+import pixy.meta.xmp.XMP;
 import pixy.image.tiff.FieldType;
 import pixy.image.tiff.TiffTag;
 import pixy.util.MetadataUtils;
@@ -57,16 +58,19 @@ public class TestPixyMeta {
 		
 		if(metadataMap.get(MetadataType.XMP) != null) {
 			XMP xmp = (XMP)metadataMap.get(MetadataType.XMP);
-			Document xmpDoc = xmp.getXmpDocument();
 			fin = new FileInputStream("images/1.jpg");
 			fout = new FileOutputStream("1-xmp-inserted.jpg");
+			JpegXMP jpegXmp = null;
 			if(!xmp.hasExtendedXmp())
-				Metadata.insertXMP(fin, fout, xmp);
-				//Metadata.insertXMP(fin, fout, XMLUtils.serializeToStringLS(xmpDoc, xmpDoc.getDocumentElement()));
+				jpegXmp = new JpegXMP(xmp.getData());
 			else {
+				Document xmpDoc = xmp.getXmpDocument();
 				Document extendedXmpDoc = xmp.getExtendedXmpDocument();
-				JPEGMeta.insertXMP(fin, fout, XMLUtils.serializeToStringLS(xmpDoc, xmpDoc.getDocumentElement()), XMLUtils.serializeToStringLS(extendedXmpDoc));
+				jpegXmp = new JpegXMP(XMLUtils.serializeToStringLS(xmpDoc, xmpDoc.getDocumentElement()), XMLUtils.serializeToStringLS(extendedXmpDoc));
 			}
+		
+			Metadata.insertXMP(fin, fout, jpegXmp);
+			
 			fin.close();
 			fout.close();
 		}

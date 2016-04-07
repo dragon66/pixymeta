@@ -18,12 +18,13 @@
  * WY    03Feb2015  Initial creation
  */
 
-package pixy.meta.exif;
+package pixy.meta.tiff;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import pixy.image.tiff.IFD;
+import pixy.meta.exif.Exif;
 
 public class TiffExif extends Exif {
 

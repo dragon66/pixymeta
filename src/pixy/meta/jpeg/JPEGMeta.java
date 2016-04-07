@@ -12,7 +12,8 @@
  * JPEGMeta.java
  *
  * Who   Date       Description
- * ====  =======    ==========================================================
+ * ====  =======    ==================================================
+ * WY    06Apr2016  Rewrite insertXMP() to leverage JpegXMP
  * WY    30Mar2016  Rewrite writeComment() to leverage COMBuilder
  * WY    06Jul2015  Added insertXMP(InputSream, OutputStream, XMP)
  * WY    02Jul2015  Added support for APP14 segment reading
@@ -84,8 +85,6 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
 
 import pixy.meta.Metadata;
 import pixy.meta.MetadataType;
@@ -94,16 +93,15 @@ import pixy.meta.adobe.IRB;
 import pixy.meta.adobe.IRBThumbnail;
 import pixy.meta.adobe.ThumbnailResource;
 import pixy.meta.adobe.ImageResourceID;
-import pixy.meta.adobe.XMP;
 import pixy.meta.adobe._8BIM;
 import pixy.meta.exif.Exif;
 import pixy.meta.exif.ExifThumbnail;
-import pixy.meta.exif.JpegExif;
 import pixy.meta.icc.ICCProfile;
 import pixy.meta.image.ImageMetadata;
 import pixy.meta.image.Comments;
 import pixy.meta.iptc.IPTC;
 import pixy.meta.iptc.IPTCDataSet;
+import pixy.meta.xmp.XMP;
 
 /**
  * JPEG image tweaking tool
@@ -128,10 +126,6 @@ public class JPEGMeta {
 	public static final String DUCKY_ID = "Ducky"; // no trailing NULL
 	public static final String PICTURE_INFO_ID = "[picture info]"; // no trailing NULL
 	public static final String ADOBE_ID = "Adobe"; // no trailing NULL
-	// Largest size for each extended XMP chunk
-	private static final int MAX_EXTENDED_XMP_CHUNK_SIZE = 65458;
-	private static final int MAX_XMP_CHUNK_SIZE = 65504;
-	private static final int GUID_LEN = 32;
 	
 	public static final EnumSet<Marker> APPnMarkers = EnumSet.range(Marker.APP0, Marker.APP15);
 	
@@ -984,13 +978,16 @@ public class JPEGMeta {
 		insertIRB(is, os, Arrays.asList(bim), true); // Set true to keep other IRB blocks
 	}
 	
-	/*
-	 * Insert XMP into single APP1 or multiple segments. Support ExtendedXMP.
+	/**
+	 * Insert a XMP instance into the image. 
+	 * The XMP instance must be able to fit into one APP1.
 	 * 
-	 * The standard part of the XMP must be a valid XMP with packet wrapper and,
-	 * should already include the GUID for the ExtendedXMP in case of ExtendedXMP.
-	 */	
-	private static void insertXMP(InputStream is, OutputStream os, byte[] xmp, byte[] extendedXmp, String guid) throws IOException {
+	 * @param is InputStream for the image.
+	 * @param os OutputStream for the image.
+	 * @param xmp XMP instance
+	 * @throws IOException
+	 */
+	public static void insertXMP(InputStream is, OutputStream os, XMP xmp) throws IOException {
 		boolean finished = false;
 		int length = 0;	
 		short marker;
@@ -1017,7 +1014,7 @@ public class JPEGMeta {
 				for(int i = 0; i <= index; i++)
 					segments.get(i).write(os);				
 				// Now we insert the XMP data
-				writeXMP(os, xmp, extendedXmp, guid);
+				xmp.write(os);
 				// Copy the remaining segments
 				for(int i = (index < 0 ? 0 : index + 1); i < segments.size(); i++) {
 					segments.get(i).write(os);
@@ -1075,54 +1072,21 @@ public class JPEGMeta {
 	}
 	
 	/**
-	 * Insert a XMP instance into the image. 
-	 * The XMP instance must be able to fit into one APP1.
-	 * 
-	 * @param is InputStream for the image.
-	 * @param os OutputStream for the image.
-	 * @param xmp XMP instance
-	 * @throws IOException
-	 */
-	public static void insertXMP(InputStream is, OutputStream os, XMP xmp) throws IOException {
-		insertXMP(is, os, xmp.getData(), null, null);
-	}
-	
-	/**
-	 * Insert a XMP string into the image. When converted to bytes, 
-	 * the XMP part should be able to fit into one APP1.
+	 * Insert XMP into single APP1 or multiple segments. Support ExtendedXMP.
+	 * The standard part of the XMP must be a valid XMP with packet wrapper and,
+	 * should already include the GUID for the ExtendedXMP in case of ExtendedXMP.
+	 * <p>
+	 * When converted to bytes, the XMP part should be able to fit into one APP1.
 	 * 
 	 * @param is InputStream for the image.
 	 * @param os OutputStream for the image.
 	 * @param xmp XML string for the XMP - Assuming in UTF-8 format.
+	 * @param extendedXmp XML string for the extended XMP - Assuming in UTF-8 format
+	 * 
 	 * @throws IOException
 	 */
 	public static void insertXMP(InputStream is, OutputStream os, String xmp, String extendedXmp) throws IOException {
-		// Add packet wrapper to the XMP document
-		// Add PI at the beginning and end of the document, we will support only UTF-8, no BOM
-		Document xmpDoc = XMLUtils.createXML(xmp);
-		XMLUtils.insertLeadingPI(xmpDoc, "xpacket", "begin='' id='W5M0MpCehiHzreSzNTczkc9d'");
-		XMLUtils.insertTrailingPI(xmpDoc, "xpacket", "end='w'");
-		Document extendedDoc = null;
-		byte[] extendedXmpBytes = null;
-		String guid = null;
-		if(extendedXmp != null) { // We have ExtendedXMP
-			extendedDoc = XMLUtils.createXML(extendedXmp);
-			extendedXmpBytes = XMLUtils.serializeToByteArray(extendedDoc);
-			guid = StringUtils.generateMD5(extendedXmpBytes);
-			NodeList descriptions = xmpDoc.getElementsByTagName("rdf:Description");
-			int length = descriptions.getLength();
-			if(length > 0) {
-				Element node = (Element)descriptions.item(length - 1);
-				node.setAttribute("xmlns:xmpNote", "http://ns.adobe.com/xmp/extension/");
-				node.setAttribute("xmpNote:HasExtendedXMP", guid);
-			}
-		}
-		// Serialize XMP to byte array
-		byte[] xmpBytes = XMLUtils.serializeToByteArray(xmpDoc);
-		if(xmpBytes.length > MAX_XMP_CHUNK_SIZE)
-			throw new RuntimeException("XMP data size exceededs JPEG segment size");
-		// Insert XMP and ExtendedXMP into image
-		insertXMP(is, os, xmpBytes, extendedXmpBytes, guid);
+		insertXMP(is, os, new JpegXMP(xmp, extendedXmp));
 	}
 	
 	private static String hTablesToString(List<HTable> hTables) {
@@ -1426,7 +1390,7 @@ public class JPEGMeta {
 				} else if(new String(data, 0, XMP_ID.length()).equals(XMP_ID) ||
 						new String(data, 0, NON_STANDARD_XMP_ID.length()).equals(NON_STANDARD_XMP_ID)) {
 					// We found XMP, add it to metadata list (We may later revise it if we have ExtendedXMP)
-					XMP xmp = new XMP(ArrayUtils.subArray(data, XMP_ID.length(), length - XMP_ID.length() - 2));
+					XMP xmp = new JpegXMP(ArrayUtils.subArray(data, XMP_ID.length(), length - XMP_ID.length() - 2));
 					metadataMap.put(MetadataType.XMP, xmp);
 					// Retrieve and remove XMP GUID if available
 					xmpGUID = XMLUtils.getAttribute(xmp.getXmpDocument(), "rdf:Description", "xmpNote:HasExtendedXMP");
@@ -1953,49 +1917,6 @@ public class JPEGMeta {
 			IOUtils.write(os, ICC_PROFILE_ID.getBytes());
 			IOUtils.writeShortMM(os, totalSegment|totalSegment<<8);
 			IOUtils.write(os, data, data.length - leftOver, leftOver);
-		}
-	}
-	
-	private static void writeXMP(OutputStream os, byte[] xmp, byte[] extendedXmp, String guid) throws IOException {
-		// Write XMP
-		IOUtils.writeShortMM(os, Marker.APP1.getValue());
-		// Write segment length
-		IOUtils.writeShortMM(os, XMP_ID.length() + 2 + xmp.length);
-		// Write segment data
-		os.write(XMP_ID.getBytes());
-		os.write(xmp);
-		// Write ExtendedXMP if we have
-		if(extendedXmp != null) {
-			int numOfChunks = extendedXmp.length / MAX_EXTENDED_XMP_CHUNK_SIZE;
-			int extendedXmpLen = extendedXmp.length;
-			int offset = 0;
-			
-			for(int i = 0; i < numOfChunks; i++) {
-				IOUtils.writeShortMM(os, Marker.APP1.getValue());
-				// Write segment length
-				IOUtils.writeShortMM(os, 2 + XMP_EXT_ID.length() + GUID_LEN + 4 + 4 + MAX_EXTENDED_XMP_CHUNK_SIZE);
-				// Write segment data
-				os.write(XMP_EXT_ID.getBytes());
-				os.write(guid.getBytes());
-				IOUtils.writeIntMM(os, extendedXmpLen);
-				IOUtils.writeIntMM(os, offset);
-				os.write(ArrayUtils.subArray(extendedXmp, offset, MAX_EXTENDED_XMP_CHUNK_SIZE));
-				offset += MAX_EXTENDED_XMP_CHUNK_SIZE;			
-			}
-			
-			int leftOver = extendedXmp.length % MAX_EXTENDED_XMP_CHUNK_SIZE;
-			
-			if(leftOver != 0) {
-				IOUtils.writeShortMM(os, Marker.APP1.getValue());
-				// Write segment length
-				IOUtils.writeShortMM(os, 2 + XMP_EXT_ID.length() + GUID_LEN + 4 + 4 + leftOver);
-				// Write segment data
-				os.write(XMP_EXT_ID.getBytes());
-				os.write(guid.getBytes());
-				IOUtils.writeIntMM(os, extendedXmpLen);
-				IOUtils.writeIntMM(os, offset);
-				os.write(ArrayUtils.subArray(extendedXmp, offset, leftOver));
-			}
 		}
 	}
 	

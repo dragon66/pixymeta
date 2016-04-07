@@ -16,7 +16,7 @@
  * WY    03Feb2015  Initial creation
  */
 
-package pixy.meta.exif;
+package pixy.meta.jpeg;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -34,6 +34,7 @@ import pixy.io.IOUtils;
 import pixy.io.MemoryCacheRandomAccessOutputStream;
 import pixy.io.RandomAccessOutputStream;
 import pixy.io.WriteStrategyMM;
+import pixy.meta.exif.Exif;
 
 public class JpegExif extends Exif {
 
