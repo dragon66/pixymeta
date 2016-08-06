@@ -818,6 +818,9 @@ public enum TiffTag implements Tag {
 
 			return description;
 		}
+		public boolean isCritical() {
+	    	return false;
+	    }
 	},
 	
 	WINDOWS_XP_COMMENT("WindowsXPComment", (short)0x9c9c, Attribute.PRIVATE) {
@@ -833,6 +836,9 @@ public enum TiffTag implements Tag {
 			
 			return description;
 		}
+		public boolean isCritical() {
+	    	return false;
+	    }
 	},
 	
 	WINDOWS_XP_AUTHOR("WindowsXPAuthor", (short)0x9c9d, Attribute.PRIVATE) {
@@ -848,6 +854,9 @@ public enum TiffTag implements Tag {
 			
 			return description;
 		}
+		public boolean isCritical() {
+	    	return false;
+	    }
 	},
 	
 	WINDOWS_XP_KEYWORDS("WindowsXPKeywords", (short)0x9c9e, Attribute.PRIVATE){
@@ -863,6 +872,9 @@ public enum TiffTag implements Tag {
 			
 			return description;
 		}
+		public boolean isCritical() {
+	    	return false;
+	    }
 	},
 	
 	WINDOWS_XP_SUBJECT("WindowsXPSubject", (short) 0x9c9f, Attribute.PRIVATE) {
@@ -878,6 +890,9 @@ public enum TiffTag implements Tag {
 
 			return description;
 		}
+		public boolean isCritical() {
+	    	return false;
+	    }
 	},
 	
 	// Ranking unknown tag the least significant.
@@ -954,4 +969,8 @@ public enum TiffTag implements Tag {
 			return name;
 		return name + " [Value: " + StringUtils.shortToHexStringMM(value) +"] (" + getAttribute() + ")";
 	}
+    
+    public boolean isCritical() {
+    	return true;
+    }
 }
