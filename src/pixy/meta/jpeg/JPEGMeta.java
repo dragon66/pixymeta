@@ -545,7 +545,7 @@ public class JPEGMeta {
 			exif.setThumbnailImage(MetadataUtils.createThumbnail(is));
 		}
 		Exif oldExif = null;
-		int oldExifIndex = -1;
+		int app0Index = -1;
 		// Copy the original image and insert EXIF data
 		boolean finished = false;
 		int length = 0;	
@@ -567,7 +567,7 @@ public class JPEGMeta {
 		while (!finished) { // Read through and add the segments to a list until SOS 
 			if (Marker.fromShort(marker) == Marker.SOS) {
 				// Write the items in segments list excluding the old EXIF
-				for(int i = 0; i < oldExifIndex; i++) {
+				for(int i = 0; i <= app0Index; i++) {
 					segments.get(i).write(os);
 				}
 				// Now we insert the EXIF data
@@ -633,7 +633,7 @@ public class JPEGMeta {
 		   		// Now insert the new EXIF to the JPEG
 		   		exif.write(os);		     	
 		     	// Copy the remaining segments
-				for(int i = oldExifIndex + 1; i < segments.size(); i++) {
+				for(int i = app0Index + 1; i < segments.size(); i++) {
 					segments.get(i).write(os);
 				}	    	
 				// Copy the leftover stuff
@@ -660,12 +660,14 @@ public class JPEGMeta {
 						// Add data to segment list
 						segments.add(new Segment(emarker, length, exifBytes));
 						// Read the EXIF data.
-						if(new String(exifBytes, 0, EXIF_ID.length()).equals(EXIF_ID)) { // We assume EXIF data exist only in one APP1
+						if(exifBytes.length >= EXIF_ID.length() && new String(exifBytes, 0, EXIF_ID.length()).equals(EXIF_ID)) { // We assume EXIF data exist only in one APP1
 							oldExif = new JpegExif(ArrayUtils.subArray(exifBytes, EXIF_ID.length(), length - EXIF_ID.length() - 2));
-							oldExifIndex = segments.size() - 1;
-						}											
+							segments.remove(segments.size() - 1);
+						}									
 						marker = IOUtils.readShortMM(is);
 						break;
+				    case APP0:
+				    	app0Index = segments.size();			
 				    default:
 					    length = IOUtils.readUnsignedShortMM(is);					
 					    byte[] buf = new byte[length - 2];
@@ -1073,14 +1075,14 @@ public class JPEGMeta {
 				        byte[] temp = new byte[length - 2];
 				        IOUtils.readFully(is, temp);
 				        // Remove XMP and ExtendedXMP segments.
-				        if(temp.length > XMP_EXT_ID.length() && new String(temp, 0, XMP_EXT_ID.length()).equals(XMP_EXT_ID)) {
+				        if(temp.length >= XMP_EXT_ID.length() && new String(temp, 0, XMP_EXT_ID.length()).equals(XMP_EXT_ID)) {
 				                ;
-				        } else if (temp.length > XMP_ID.length() && new String(temp, 0, XMP_ID.length()).equals(XMP_ID)) {
+				        } else if (temp.length >= XMP_ID.length() && new String(temp, 0, XMP_ID.length()).equals(XMP_ID)) {
 				                ;
 				        } else {                                               
 				                segments.add(new Segment(emarker, length, temp));
 				                // If it's EXIF, we keep the index
-				                if(temp.length > EXIF_ID.length() && new String(temp, 0, EXIF_ID.length()).equals(EXIF_ID)) {
+				                if(temp.length >= EXIF_ID.length() && new String(temp, 0, EXIF_ID.length()).equals(EXIF_ID)) {
 				                        exifIndex = segments.size() - 1;
 				                }
 				        }
@@ -1452,7 +1454,7 @@ public class JPEGMeta {
 				}
 			} else if(segment.getMarker() == Marker.APP12) {
 				if (new String(data, 0, DUCKY_ID.length()).equals(DUCKY_ID)) {
-					metadataMap.put(MetadataType.JPG_DUCKY, new APP12Segment(ArrayUtils.subArray(data, DUCKY_ID.length(), length - DUCKY_ID.length() - 2)));
+					metadataMap.put(MetadataType.JPG_DUCKY, new DuckySegment(ArrayUtils.subArray(data, DUCKY_ID.length(), length - DUCKY_ID.length() - 2)));
 				}
 			} else if(segment.getMarker() == Marker.APP13) {
 				if (new String(data, 0, PHOTOSHOP_IRB_ID.length()).equals(PHOTOSHOP_IRB_ID)) {
@@ -1462,7 +1464,7 @@ public class JPEGMeta {
 				}
 			} else if(segment.getMarker() == Marker.APP14) {
 				if (new String(data, 0, ADOBE_ID.length()).equals(ADOBE_ID)) {
-					metadataMap.put(MetadataType.JPG_ADOBE, new APP14Segment(ArrayUtils.subArray(data, ADOBE_ID.length(), length - ADOBE_ID.length() - 2)));
+					metadataMap.put(MetadataType.JPG_ADOBE, new AdobeSegment(ArrayUtils.subArray(data, ADOBE_ID.length(), length - ADOBE_ID.length() - 2)));
 				}
 			}
 		}
