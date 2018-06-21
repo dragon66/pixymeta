@@ -70,35 +70,39 @@ public enum IPTCEnvelopeTag implements IPTCTag {
 			 e.printStackTrace();
 		 }
 		 // Hex representation of the data
-		 return StringUtils.byteArrayToHexString(data, 0, 10);
+		 return StringUtils.byteArrayToHexString(data, 0, IPTCTag.MAX_STRING_REPR_LEN);
 	 }
 	 
 	 public String getName() {
 		 return name;
 	 }
 	 
+	 public int getRecordNumber() {
+		 return IPTCRecord.ENVELOP.getRecordNumber();
+	 }
+	 
 	 public int getTag() { return tag; }
 	 
 	 public static IPTCEnvelopeTag fromTag(int value) {
-      	IPTCEnvelopeTag record = recordMap.get(value);
+     	IPTCEnvelopeTag record = recordMap.get(value);
 	   	if (record == null)
 	   		return UNKNOWN;
-   		return record;
+  		return record;
 	 }
-  
+ 
 	 @Override public String toString() {
 	   return name;
 	 }
-  
+ 
 	 private static final Map<Integer, IPTCEnvelopeTag> recordMap = new HashMap<Integer, IPTCEnvelopeTag>();
-   
+  
 	 static
 	 {
 		 for(IPTCEnvelopeTag record : values()) {
 			 recordMap.put(record.getTag(), record);
 		 }
 	 }	    
- 
+
 	 private final int tag;
 	 private final String name;
 }

@@ -28,7 +28,7 @@ public enum IPTCApplicationTag implements IPTCTag {
 	 RECORD_VERSION(0, "ApplicationRecordVersion") {
 		 public String getDataAsString(byte[] data) {
 			 // Hex representation of the data
-			 return StringUtils.byteArrayToHexString(data, 0, 10);
+			 return StringUtils.byteArrayToHexString(data);
 		 }
 	 },
 	 OBJECT_TYPE_REF(3, "ObjectTypeRef"),
@@ -200,11 +200,16 @@ public enum IPTCApplicationTag implements IPTCTag {
 			 e.printStackTrace();
 		 }
 		 // Hex representation of the data
-		 return StringUtils.byteArrayToHexString(data, 0, 10);
+		 return StringUtils.byteArrayToHexString(data, 0, IPTCTag.MAX_STRING_REPR_LEN);
 	 }
 	 
 	 public String getName() {
 		 return name;
+	 }
+	 
+	 
+	 public int getRecordNumber() {
+		 return IPTCRecord.APPLICATION.getRecordNumber();
 	 }
 	 
 	 public int getTag() { 
@@ -212,25 +217,25 @@ public enum IPTCApplicationTag implements IPTCTag {
 	 }
 	 
 	 public static IPTCApplicationTag fromTag(int value) {
-      	IPTCApplicationTag record = recordMap.get(value);
-   	if (record == null)
-   		return UNKNOWN;
-   	return record;
-   }
-  
-   @Override public String toString() {
-	   return name;
-   }
-  
-   private static final Map<Integer, IPTCApplicationTag> recordMap = new HashMap<Integer, IPTCApplicationTag>();
-   
-   static
-   {
-     for(IPTCApplicationTag record : values()) {
-         recordMap.put(record.getTag(), record);
-     }
-   }	    
+     	IPTCApplicationTag record = recordMap.get(value);
+  	if (record == null)
+  		return UNKNOWN;
+  	return record;
+  }
  
-   private final int tag;
-   private final String name;				
+  @Override public String toString() {
+	   return name;
+  }
+ 
+  private static final Map<Integer, IPTCApplicationTag> recordMap = new HashMap<Integer, IPTCApplicationTag>();
+  
+  static
+  {
+    for(IPTCApplicationTag record : values()) {
+        recordMap.put(record.getTag(), record);
+    }
+  }	    
+
+  private final int tag;
+  private final String name;				
 }

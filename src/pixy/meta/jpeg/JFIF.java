@@ -9,7 +9,7 @@
  *
  * Change History - most recent changes go on top of previous changes
  *
- * JFIFSegment.java
+ * JFIF.java
  *
  * Who   Date       Description
  * ====  =======    ============================================================
@@ -29,19 +29,19 @@ import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import pixy.meta.Metadata;
+import pixy.meta.MetadataEntry;
 import pixy.meta.MetadataType;
 import pixy.io.IOUtils;
 import pixy.util.ArrayUtils;
 
-public class JFIFSegment extends Metadata {
-	// Obtain a logger instance
-	private static final Logger LOGGER = LoggerFactory.getLogger(JFIFSegment.class);
-		
+public class JFIF extends Metadata {
+	
 	private static void checkInput(int majorVersion, int minorVersion, int densityUnit, int xDensity, int yDensity) {
 		if(majorVersion < 0 || majorVersion > 0xff) throw new IllegalArgumentException("Invalid major version number: " + majorVersion);
 		if(minorVersion < 0 || minorVersion > 0xff) throw new IllegalArgumentException("Invalid minor version number: " + minorVersion);
@@ -61,16 +61,16 @@ public class JFIFSegment extends Metadata {
 	
 	private JFIFThumbnail thumbnail;
 
-	public JFIFSegment(byte[] data) {
+	public JFIF(byte[] data) {
 		super(MetadataType.JPG_JFIF, data);
 		ensureDataRead();
 	}
 	
-	public JFIFSegment(int majorVersion, int minorVersion, int densityUnit, int xDensity, int yDensity) {
+	public JFIF(int majorVersion, int minorVersion, int densityUnit, int xDensity, int yDensity) {
 		this(majorVersion, minorVersion, densityUnit, xDensity, yDensity, null);
 	}
 	
-	public JFIFSegment(int majorVersion, int minorVersion, int densityUnit, int xDensity, int yDensity, JFIFThumbnail thumbnail) {
+	public JFIF(int majorVersion, int minorVersion, int densityUnit, int xDensity, int yDensity, JFIFThumbnail thumbnail) {
 		super(MetadataType.JPG_JFIF);
 		checkInput(majorVersion, minorVersion, densityUnit, xDensity, yDensity);
 		this.majorVersion = majorVersion;
@@ -131,6 +131,20 @@ public class JFIFSegment extends Metadata {
 		return yDensity;
 	}
 	
+	public Iterator<MetadataEntry> iterator() {
+		ensureDataRead();
+		List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
+		String[] densityUnits = {"No units, aspect ratio only specified", "Dots per inch", "Dots per centimeter"};
+		entries.add(new MetadataEntry("Version", majorVersion + "." + minorVersion));
+		entries.add(new MetadataEntry("Density unit", (densityUnit <= 2)?densityUnits[densityUnit]:densityUnit + ""));
+		entries.add(new MetadataEntry("XDensity", xDensity + ""));
+		entries.add(new MetadataEntry("YDensity", yDensity + ""));
+		entries.add(new MetadataEntry("Thumbnail width", thumbnailWidth + ""));
+		entries.add(new MetadataEntry("Thumbnail height", thumbnailHeight + ""));
+		
+		return Collections.unmodifiableCollection(entries).iterator();
+	}
+	
 	public void read() throws IOException {
 		if(!isDataRead) {
 			int expectedLen = 9;
@@ -149,9 +163,9 @@ public class JFIFSegment extends Metadata {
 				if(thumbnailWidth != 0 && thumbnailHeight != 0) {
 					containsThumbnail = true;
 					// Extract the thumbnail
-		    		//Create a BufferedImage
+		    		//Create a Bitmap
 		    		int size = 3*thumbnailWidth*thumbnailHeight;
-					DataBuffer db = new DataBufferByte(ArrayUtils.subArray(data, expectedLen, size), size);
+		    		DataBuffer db = new DataBufferByte(ArrayUtils.subArray(data, expectedLen, size), size);
 					int[] off = {0, 1, 2};//RGB band offset, we have 3 bands
 					int numOfBands = 3;						
 					WritableRaster raster = Raster.createInterleavedRaster(db, thumbnailWidth, thumbnailHeight, 3*thumbnailWidth, numOfBands, off, null);
@@ -164,20 +178,6 @@ public class JFIFSegment extends Metadata {
 		}		
 	}
 
-	@Override
-	public void showMetadata() {
-		ensureDataRead();
-		String[] densityUnits = {"No units, aspect ratio only specified", "Dots per inch", "Dots per centimeter"};
-		LOGGER.info("JPEG JFIF output starts =>");
-		LOGGER.info("Version: {}.{}", majorVersion, minorVersion);
-		LOGGER.info("Density unit: {}", (densityUnit <= 2)?densityUnits[densityUnit]:densityUnit);
-		LOGGER.info("XDensity: {}", xDensity);
-		LOGGER.info("YDensity: {}", yDensity);
-		LOGGER.info("Thumbnail width: {}", thumbnailWidth);
-		LOGGER.info("Thumbnail height: {}", thumbnailHeight);
-		LOGGER.info("<= JPEG JFIF output ends");		
-	}
-	
 	public void write(OutputStream os) throws IOException {
 		ensureDataRead();
 		IOUtils.write(os, majorVersion);

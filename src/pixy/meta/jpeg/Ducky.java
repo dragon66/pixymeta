@@ -9,7 +9,7 @@
  *
  * Change History - most recent changes go on top of previous changes
  *
- * DuckySegment.java
+ * Ducky.java
  *
  * Who   Date       Description
  * ====  =======    ============================================================
@@ -20,9 +20,12 @@ package pixy.meta.jpeg;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -30,22 +33,23 @@ import org.slf4j.LoggerFactory;
 
 import pixy.io.IOUtils;
 import pixy.meta.Metadata;
+import pixy.meta.MetadataEntry;
 import pixy.meta.MetadataType;
 
-public class DuckySegment extends Metadata {
+public class Ducky extends Metadata {
 
 	private Map<DuckyTag, DuckyDataSet> datasetMap;
 	
 	// Obtain a logger instance
-	private static final Logger LOGGER = LoggerFactory.getLogger(DuckySegment.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Ducky.class);
 		
-	public DuckySegment() {
+	public Ducky() {
 		super(MetadataType.JPG_DUCKY);
 		datasetMap =  new EnumMap<DuckyTag, DuckyDataSet>(DuckyTag.class);
 		isDataRead = true;
 	}
 	
-	public DuckySegment(byte[] data) {
+	public Ducky(byte[] data) {
 		super(MetadataType.JPG_DUCKY, data);
 	}
 	
@@ -66,6 +70,18 @@ public class DuckySegment extends Metadata {
 	public Map<DuckyTag, DuckyDataSet> getDataSets() {
 		ensureDataRead();
 		return Collections.unmodifiableMap(datasetMap);
+	}
+	
+	public Iterator<MetadataEntry> iterator() {
+		ensureDataRead();
+		
+		List<MetadataEntry> entries = new ArrayList<MetadataEntry>();
+			
+		for(DuckyDataSet dataset : datasetMap.values()) {
+			entries.add(dataset.getMetadataEntry());
+		}
+		
+		return Collections.unmodifiableCollection(entries).iterator();
 	}
 	
 	public void read() throws IOException {
@@ -90,12 +106,12 @@ public class DuckySegment extends Metadata {
 
 	public void showMetadata() {
 		ensureDataRead();
-		LOGGER.info("JPEG DuckySegment output starts =>");
+		LOGGER.info("JPEG Ducky output starts =>");
 		// Print DuckyDataSet
 		for(DuckyDataSet dataset : datasetMap.values()) {
 			dataset.print();
 		}
-		LOGGER.info("<= JPEG DuckySegment output ends");
+		LOGGER.info("<= JPEG Ducky output ends");
 	}
 	
 	public void write(OutputStream os) throws IOException {

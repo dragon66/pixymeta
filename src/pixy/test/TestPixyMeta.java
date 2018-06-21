@@ -9,7 +9,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 
 import pixy.meta.Metadata;
+import pixy.meta.MetadataEntry;
 import pixy.meta.MetadataType;
 import pixy.meta.adobe.IPTC_NAA;
 import pixy.meta.adobe._8BIM;
@@ -33,26 +36,41 @@ import pixy.meta.xmp.XMP;
 import pixy.image.tiff.FieldType;
 import pixy.image.tiff.TiffTag;
 import pixy.util.MetadataUtils;
+import pixy.string.StringUtils;
 import pixy.string.XMLUtils;
 
 public class TestPixyMeta {
 	// Obtain a logger instance
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestPixyMeta.class);
-		
-	public static void main(String[] args) throws IOException {
+	
+	public static void main(String[] args) throws Exception {
+		new TestPixyMeta().test(args);
+	}
+	
+	public void test(String ... args) throws Exception {
 		Map<MetadataType, Metadata> metadataMap = Metadata.readMetadata(args[0]);
 		LOGGER.info("Start of metadata information:");
 		LOGGER.info("Total number of metadata entries: {}", metadataMap.size());
 		
 		int i = 0;
 		for(Map.Entry<MetadataType, Metadata> entry : metadataMap.entrySet()) {
+			//
 			LOGGER.info("Metadata entry {} - {}", i, entry.getKey());
-			entry.getValue().showMetadata();
+			Metadata meta = entry.getValue();
+			if(meta instanceof XMP) XMP.showXMP((XMP)meta);
+			else {
+				Iterator<MetadataEntry> iterator = entry.getValue().iterator();
+				
+				while(iterator.hasNext()) {
+					MetadataEntry item = iterator.next();
+					printMetadata(item, "", "     ");
+				}
+			}			
 			i++;
 			LOGGER.info("-----------------------------------------");
 		}
 		LOGGER.info("End of metadata information.");
-	
+
 		FileInputStream fin = null;
 		FileOutputStream fout = null;
 		
@@ -66,11 +84,9 @@ public class TestPixyMeta {
 			else {
 				Document xmpDoc = xmp.getXmpDocument();
 				Document extendedXmpDoc = xmp.getExtendedXmpDocument();
-				jpegXmp = new JpegXMP(XMLUtils.serializeToStringLS(xmpDoc, xmpDoc.getDocumentElement()), XMLUtils.serializeToStringLS(extendedXmpDoc));
+				jpegXmp = new JpegXMP(XMLUtils.serializeToString(xmpDoc.getDocumentElement(), "UTF-8"), XMLUtils.serializeToString(extendedXmpDoc));
 			}
-		
 			Metadata.insertXMP(fin, fout, jpegXmp);
-			
 			fin.close();
 			fout.close();
 		}
@@ -208,5 +224,16 @@ public class TestPixyMeta {
 		exif.setThumbnailRequired(true);
 		
 		return exif;
+	}
+	
+	private void printMetadata(MetadataEntry entry, String indent, String increment) {
+		LOGGER.info(indent + entry.getKey() + (StringUtils.isNullOrEmpty(entry.getValue())? "" : ": " + entry.getValue()));
+		if(entry.isMetadataEntryGroup()) {
+			indent += increment;
+			Collection<MetadataEntry> entries = entry.getMetadataEntries();
+			for(MetadataEntry e : entries) {
+				printMetadata(e, indent, increment);
+			}			
+		}
 	}
 }

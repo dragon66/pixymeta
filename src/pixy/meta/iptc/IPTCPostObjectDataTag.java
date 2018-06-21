@@ -47,11 +47,15 @@ public enum IPTCPostObjectDataTag implements IPTCTag {
 			 e.printStackTrace();
 		 }
 		 // Hex representation of the data
-		 return StringUtils.byteArrayToHexString(data, 0, 10);
+		 return StringUtils.byteArrayToHexString(data, 0, IPTCTag.MAX_STRING_REPR_LEN);
 	 }
 	 
 	 public String getName() {
 		return name; 
+	 }
+	 
+	 public int getRecordNumber() {
+	 	return IPTCRecord.POST_OBJECTDATA.getRecordNumber();
 	 }
 	 
 	 public int getTag() {
@@ -62,22 +66,22 @@ public enum IPTCPostObjectDataTag implements IPTCTag {
 		 IPTCPostObjectDataTag record = recordMap.get(value);
 	   	if (record == null)
 	   		return UNKNOWN;
-      	return record;
+     	return record;
 	 }
-  
+ 
 	 @Override public String toString() {
 	   return name;
 	 }
-  
+ 
 	 private static final Map<Integer, IPTCPostObjectDataTag> recordMap = new HashMap<Integer, IPTCPostObjectDataTag>();
-   
+  
 	 static
 	 {
 		 for(IPTCPostObjectDataTag record : values()) {
 			 recordMap.put(record.getTag(), record);
 		 }
 	 }	    
- 
+
 	 private final int tag;
 	 private final String name;
 }

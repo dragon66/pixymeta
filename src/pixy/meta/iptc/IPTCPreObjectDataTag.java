@@ -50,11 +50,15 @@ public enum IPTCPreObjectDataTag implements IPTCTag {
 			 e.printStackTrace();
 		 }
 		 // Hex representation of the data
-		 return StringUtils.byteArrayToHexString(data, 0, 10);
+		 return StringUtils.byteArrayToHexString(data, 0, IPTCTag.MAX_STRING_REPR_LEN);
 	 }
 	 
 	 public String getName() {
 		 return name;
+	 }
+	 
+	 public int getRecordNumber() {
+	 	return IPTCRecord.PRE_OBJECTDATA.getRecordNumber();
 	 }
 	 
 	 public int getTag() {
@@ -65,22 +69,22 @@ public enum IPTCPreObjectDataTag implements IPTCTag {
 		 IPTCPreObjectDataTag record = recordMap.get(value);
 	   	if (record == null)
 	   		return UNKNOWN;
-     	return record;
+    	return record;
 	 }
-  
+ 
 	 @Override public String toString() {
 	   return name;
 	 }
-  
+ 
 	 private static final Map<Integer, IPTCPreObjectDataTag> recordMap = new HashMap<Integer, IPTCPreObjectDataTag>();
-   
+  
 	 static
 	 {
 		 for(IPTCPreObjectDataTag record : values()) {
 			 recordMap.put(record.getTag(), record);
 		 }
 	 }	    
- 
+
 	 private final int tag;
 	 private final String name;
 }

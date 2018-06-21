@@ -103,6 +103,7 @@ import pixy.meta.image.ImageMetadata;
 import pixy.meta.image.Comments;
 import pixy.meta.iptc.IPTC;
 import pixy.meta.iptc.IPTCDataSet;
+import pixy.meta.iptc.IPTCTag;
 import pixy.meta.xmp.XMP;
 
 /**
@@ -836,7 +837,7 @@ public class JPEGMeta {
 					if(iptcBIM != null && update) { // Keep the original values
 						IPTC iptc = new IPTC(iptcBIM.getData());
 						// Shallow copy the map
-						Map<String, List<IPTCDataSet>> dataSetMap = new HashMap<String, List<IPTCDataSet>>(iptc.getDataSets());
+						Map<IPTCTag, List<IPTCDataSet>> dataSetMap = new HashMap<IPTCTag, List<IPTCDataSet>>(iptc.getDataSets());
 						for(IPTCDataSet set : iptcs)
 							if(!set.allowMultiple())
 								dataSetMap.remove(set.getName());
@@ -1412,7 +1413,7 @@ public class JPEGMeta {
 			length = segment.getLength();
 			if(segment.getMarker() == Marker.APP0) {
 				if (new String(data, 0, JFIF_ID.length()).equals(JFIF_ID)) {
-					metadataMap.put(MetadataType.JPG_JFIF, new JFIFSegment(ArrayUtils.subArray(data, JFIF_ID.length(), length - JFIF_ID.length() - 2)));
+					metadataMap.put(MetadataType.JPG_JFIF, new JFIF(ArrayUtils.subArray(data, JFIF_ID.length(), length - JFIF_ID.length() - 2)));
 				}
 			} else if(segment.getMarker() == Marker.APP1) {
 				// Check for EXIF
@@ -1454,7 +1455,7 @@ public class JPEGMeta {
 				}
 			} else if(segment.getMarker() == Marker.APP12) {
 				if (new String(data, 0, DUCKY_ID.length()).equals(DUCKY_ID)) {
-					metadataMap.put(MetadataType.JPG_DUCKY, new DuckySegment(ArrayUtils.subArray(data, DUCKY_ID.length(), length - DUCKY_ID.length() - 2)));
+					metadataMap.put(MetadataType.JPG_DUCKY, new Ducky(ArrayUtils.subArray(data, DUCKY_ID.length(), length - DUCKY_ID.length() - 2)));
 				}
 			} else if(segment.getMarker() == Marker.APP13) {
 				if (new String(data, 0, PHOTOSHOP_IRB_ID.length()).equals(PHOTOSHOP_IRB_ID)) {
@@ -1464,7 +1465,7 @@ public class JPEGMeta {
 				}
 			} else if(segment.getMarker() == Marker.APP14) {
 				if (new String(data, 0, ADOBE_ID.length()).equals(ADOBE_ID)) {
-					metadataMap.put(MetadataType.JPG_ADOBE, new AdobeSegment(ArrayUtils.subArray(data, ADOBE_ID.length(), length - ADOBE_ID.length() - 2)));
+					metadataMap.put(MetadataType.JPG_ADOBE, new Adobe(ArrayUtils.subArray(data, ADOBE_ID.length(), length - ADOBE_ID.length() - 2)));
 				}
 			}
 		}
@@ -1472,7 +1473,6 @@ public class JPEGMeta {
 		// Now it's time to join multiple segments ICC_PROFILE and/or XMP		
 		if(iccProfileStream != null) { // We have ICCProfile data
 			ICCProfile icc_profile = new ICCProfile(iccProfileStream.toByteArray());
-			icc_profile.showMetadata();
 			metadataMap.put(MetadataType.ICC_PROFILE, icc_profile);
 		}
 		
@@ -1516,7 +1516,7 @@ public class JPEGMeta {
 			}
 		}
 		
-		metadataMap.put(MetadataType.IMAGE, new ImageMetadata(null, thumbnails));
+		metadataMap.put(MetadataType.IMAGE, new ImageMetadata(thumbnails));
 		
 		return metadataMap;
 	}

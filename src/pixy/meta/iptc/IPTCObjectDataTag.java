@@ -38,7 +38,7 @@ public enum IPTCObjectDataTag implements IPTCTag {
 		 IPTCObjectDataTag record = recordMap.get(value);
 	   	if (record == null)
 	   		return UNKNOWN;
-      	return record;
+     	return record;
 	 }
 	 
 	 public boolean allowMultiple() {
@@ -54,30 +54,34 @@ public enum IPTCObjectDataTag implements IPTCTag {
 			 e.printStackTrace();
 		 }
 		 // Hex representation of the data
-		 return StringUtils.byteArrayToHexString(data, 0, 10);
+		 return StringUtils.byteArrayToHexString(data, 0, IPTCTag.MAX_STRING_REPR_LEN);
 	 }
 	 
 	 public String getName() {
 		 return name;
 	 }
 	 
+	 public int getRecordNumber() {
+		 return IPTCRecord.OBJECTDATA.getRecordNumber();
+	 }
+	 
 	 public int getTag() {
 		 return tag;
 	 }
-  
+ 
 	 @Override public String toString() {
 	   return name;
 	 }
-  
+ 
 	 private static final Map<Integer, IPTCObjectDataTag> recordMap = new HashMap<Integer, IPTCObjectDataTag>();
-   
+  
 	 static
 	 {
 		 for(IPTCObjectDataTag record : values()) {
 			 recordMap.put(record.getTag(), record);
 		 }
 	 }	    
- 
+
 	 private final int tag;
 	 private final String name;
 }
