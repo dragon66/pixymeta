@@ -28,7 +28,7 @@ import pixy.meta.exif.Exif;
 import pixy.meta.exif.ExifTag;
 import pixy.meta.iptc.IPTCApplicationTag;
 import pixy.meta.iptc.IPTCDataSet;
-import pixy.meta.jpeg.JPEGMeta;
+import pixy.meta.jpeg.JPGMeta;
 import pixy.meta.jpeg.JpegExif;
 import pixy.meta.jpeg.JpegXMP;
 import pixy.meta.tiff.TiffExif;
@@ -158,7 +158,7 @@ public class TestPixyMeta {
 		fout.close();
 		
 		fin = new FileInputStream("images/table.jpg");
-		JPEGMeta.extractDepthMap(fin, "table");
+		JPGMeta.extractDepthMap(fin, "table");
 		
 		fin.close();
 		
