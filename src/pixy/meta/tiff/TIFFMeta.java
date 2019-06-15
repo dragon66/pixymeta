@@ -357,6 +357,8 @@ public class TIFFMeta {
 				}				
 			} // End of bug fix
 			
+			writeByteCount = counts[0];
+			
 			// We are going to write the image data first
 			rout.seek(writeOffset);
 			
@@ -368,7 +370,6 @@ public class TIFFMeta {
 				rout.write(buf);
 				temp[i] = writeOffset;
 				writeOffset += buf.length;
-				writeByteCount += counts[i];
 			}
 						
 			if(ifd.getField(TiffTag.STRIP_BYTE_COUNTS) != null)
