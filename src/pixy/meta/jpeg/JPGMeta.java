@@ -98,6 +98,7 @@ import pixy.meta.adobe.ThumbnailResource;
 import pixy.meta.adobe.ImageResourceID;
 import pixy.meta.adobe._8BIM;
 import pixy.meta.exif.Exif;
+import pixy.meta.exif.ExifTag;
 import pixy.meta.exif.ExifThumbnail;
 import pixy.meta.icc.ICCProfile;
 import pixy.meta.image.ImageMetadata;
@@ -116,7 +117,7 @@ import static pixy.image.jpeg.JPGConsts.*;
  * @version 1.0 01/25/2013
  */
 public class JPGMeta {
-		
+	
 	public static final EnumSet<Marker> APPnMarkers = EnumSet.range(Marker.APP0, Marker.APP15);
 	
 	// Obtain a logger instance
@@ -130,7 +131,7 @@ public class JPGMeta {
 		IOUtils.writeShortMM(os, (short) length);
 		IOUtils.write(os, buf);
 		
-		return(IOUtils.readShortMM(is));
+		return (IOUtils.readShortMM(is));
 	}
 	
 	/** Copy a single SOS segment */	
@@ -436,7 +437,7 @@ public class JPGMeta {
 		
 		metadataMap.put(MetadataType.IMAGE, new ImageMetadata(thumbnails));
 	}
-		
+	
 	/**
 	 * Extracts thumbnail images from JFIF/APP0, Exif APP1 and/or Adobe APP13 segment if any.
 	 * 
@@ -451,7 +452,7 @@ public class JPGMeta {
 		short marker;
 		Marker emarker;
 				
-		// The very first marker should be the start_of_image marker!	
+		// The very first marker should be the start_of_image marker!
 		if(Marker.fromShort(IOUtils.readShortMM(is)) != Marker.SOI)
 			throw new IOException("Invalid JPEG image, expected SOI marker not found!");
 		
@@ -496,7 +497,7 @@ public class JPGMeta {
 					    		// Extract the thumbnail
 					    		//Create a BufferedImage
 					    		int size = 3*thumbnailWidth*thumbnailHeight;
-								DataBuffer db = new DataBufferByte(ArrayUtils.subArray(jfif_buf, 14, size), size);
+					    		DataBuffer db = new DataBufferByte(ArrayUtils.subArray(jfif_buf, 14, size), size);
 								int[] off = {0, 1, 2};//RGB band offset, we have 3 bands
 								int numOfBands = 3;
 								int trans = Transparency.OPAQUE;
@@ -657,11 +658,11 @@ public class JPGMeta {
 		int app0Index = -1;
 		// Copy the original image and insert EXIF data
 		boolean finished = false;
-		int length = 0;	
+		int length = 0;
 		short marker;
 		Marker emarker;
 				
-		// The very first marker should be the start_of_image marker!	
+		// The very first marker should be the start_of_image marker!
 		if(Marker.fromShort(IOUtils.readShortMM(is)) != Marker.SOI)	{
 			throw new IOException("Invalid JPEG image, expected SOI marker not found!");
 		}
@@ -683,16 +684,20 @@ public class JPGMeta {
 		    	IFD newExifSubIFD = exif.getExifIFD();
 		    	IFD newGpsSubIFD = exif.getGPSIFD();
 		    	IFD newImageIFD = exif.getImageIFD();
-		    	ExifThumbnail newThumbnail = exif.getThumbnail();	    
+		    	IFD newInteropSubIFD = exif.getInteropIFD();
+		    	ExifThumbnail newThumbnail = exif.getThumbnail();  
 		    	// Define new IFDs
 		    	IFD exifSubIFD = null;
 		    	IFD gpsSubIFD = null;
+		    	IFD interopSubIFD = null;
 		    	IFD imageIFD = null;
 		    	// Got to do something to keep the old data
 		    	if(update && oldExif != null) {
 		    		IFD oldImageIFD = oldExif.getImageIFD();
 			    	IFD oldExifSubIFD = oldExif.getExifIFD();
 			    	IFD oldGpsSubIFD = oldExif.getGPSIFD();
+			    	IFD oldInteropSubIFD = oldExif.getInteropIFD();
+			    	
 			    	ExifThumbnail thumbnail = oldExif.getThumbnail();
 			    	
 			    	if(oldImageIFD != null) {
@@ -706,6 +711,10 @@ public class JPGMeta {
 			    	if(oldExifSubIFD != null) {
 			    		exifSubIFD = new IFD();
 			    		exifSubIFD.addFields(oldExifSubIFD.getFields());
+			    	}
+			    	if(oldInteropSubIFD != null) {
+			    		interopSubIFD = new IFD();
+			    		interopSubIFD.addFields(oldInteropSubIFD.getFields());
 			    	}
 			    	if(oldGpsSubIFD != null) {
 			    		gpsSubIFD = new IFD();
@@ -722,6 +731,11 @@ public class JPGMeta {
 		    			exifSubIFD.addFields(newExifSubIFD.getFields());
 		    	} else
 		    		exifSubIFD = newExifSubIFD;
+		    	if(interopSubIFD != null) {
+		    		if(newInteropSubIFD != null)
+		    			interopSubIFD.addFields(newInteropSubIFD.getFields());
+		    	} else
+		    		interopSubIFD = newInteropSubIFD;
 		    	if(gpsSubIFD != null) {
 		    		if(newGpsSubIFD != null)
 		    			gpsSubIFD.addFields(newGpsSubIFD.getFields());
@@ -729,18 +743,23 @@ public class JPGMeta {
 		    		gpsSubIFD = newGpsSubIFD;
 		    	// If we have ImageIFD, set Image IFD attached with EXIF and GPS
 		     	if(imageIFD != null) {
-		    		if(exifSubIFD != null)
+		    		if(exifSubIFD != null) {
 			    		imageIFD.addChild(TiffTag.EXIF_SUB_IFD, exifSubIFD);
+			    		if(interopSubIFD != null) {
+				    		exifSubIFD.addChild(ExifTag.EXIF_INTEROPERABILITY_OFFSET, interopSubIFD);
+			    		}
+		    		}
 		    		if(gpsSubIFD != null)
 			    		imageIFD.addChild(TiffTag.GPS_SUB_IFD, gpsSubIFD);
 		    		exif.setImageIFD(imageIFD);
 		    	} else { // Otherwise, set EXIF and GPS IFD separately
 		    		exif.setExifIFD(exifSubIFD);
 		    		exif.setGPSIFD(gpsSubIFD);
+		    		exif.setInteropIFD(interopSubIFD);
 		    	}
 		   		exif.setThumbnail(newThumbnail);
 		   		// Now insert the new EXIF to the JPEG
-		   		exif.write(os);		     	
+		   		exif.write(os);
 		     	// Copy the remaining segments
 				for(int i = app0Index + 1; i < segments.size(); i++) {
 					segments.get(i).write(os);
@@ -772,13 +791,13 @@ public class JPGMeta {
 						if(exifBytes.length >= EXIF_ID.length() && new String(exifBytes, 0, EXIF_ID.length()).equals(EXIF_ID)) { // We assume EXIF data exist only in one APP1
 							oldExif = new JpegExif(ArrayUtils.subArray(exifBytes, EXIF_ID.length(), length - EXIF_ID.length() - 2));
 							segments.remove(segments.size() - 1);
-						}									
+						}											
 						marker = IOUtils.readShortMM(is);
 						break;
 				    case APP0:
-				    	app0Index = segments.size();			
+				    	app0Index = segments.size();
 				    default:
-					    length = IOUtils.readUnsignedShortMM(is);					
+					    length = IOUtils.readUnsignedShortMM(is);				
 					    byte[] buf = new byte[length - 2];
 					    IOUtils.readFully(is, buf);
 					    if(emarker == Marker.UNKNOWN)
@@ -882,9 +901,9 @@ public class JPGMeta {
 				    	 byte[] buf = new byte[length - 2];
 				    	 IOUtils.readFully(is, buf);
 				    	 if(emarker == Marker.UNKNOWN)
-				    		 segments.add(new UnknownSegment(marker, length, buf));
+					    	segments.add(new UnknownSegment(marker, length, buf));
 				    	 else
-				    		 segments.add(new Segment(emarker, length, buf));
+					    	segments.add(new Segment(emarker, length, buf));
 				    	 marker = IOUtils.readShortMM(is);
 				}
 			}
@@ -990,9 +1009,9 @@ public class JPGMeta {
 						marker = IOUtils.readShortMM(is);
 						break;
 					case APP13:
-				   		if(eightBIMStream == null)
-				   			eightBIMStream = new ByteArrayOutputStream();
-				   		readAPP13(is, eightBIMStream);				
+			    		if(eightBIMStream == null)
+			    			eightBIMStream = new ByteArrayOutputStream();
+			    		readAPP13(is, eightBIMStream);
 				    	marker = IOUtils.readShortMM(is);
 				    	break;
 					case APP0:
@@ -1021,7 +1040,7 @@ public class JPGMeta {
 	 * @param bims a collection of _8BIM to be inserted
 	 * @param update boolean if true, keep the other _8BIMs; otherwise, replace the whole IRB with the inserted _8BIMs 
 	 * @throws IOException
-	 */	
+	 */
 	public static void insertIRB(InputStream is, OutputStream os, Collection<_8BIM> bims, boolean update) throws IOException {
 		// Copy the original image and insert Photoshop IRB data
 		boolean finished = false;
@@ -1415,7 +1434,7 @@ public class JPGMeta {
 		byte[] extendedXMP = null;
 		String xmpGUID = ""; // 32 byte ASCII hex string
 		Comments comments = null;
-		
+				
 		List<Segment> appnSegments = new ArrayList<Segment>();
 	
 		boolean finished = false;
@@ -1489,7 +1508,7 @@ public class JPGMeta {
 						SOFReader reader = readers.get(readers.size() - 1);
 						marker = readSOS(is, reader);
 						LOGGER.debug("\n{}", sofToString(reader));
-						break;		
+						break;
 					case JPG: // JPG and JPGn shouldn't appear in the image.
 					case JPG0:
 					case JPG13:
@@ -1515,7 +1534,7 @@ public class JPGMeta {
 		LOGGER.debug("\n{}", qTablesToString(m_qTables));
 		LOGGER.debug("\n{}", hTablesToString(m_acTables));	
 		LOGGER.debug("\n{}", hTablesToString(m_dcTables));
-		
+			
 		for(Segment segment : appnSegments) {
 			byte[] data = segment.getData();
 			length = segment.getLength();
