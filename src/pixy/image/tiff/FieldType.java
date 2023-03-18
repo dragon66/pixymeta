@@ -38,7 +38,6 @@ public enum FieldType {
 	WINDOWSXP("WindowsXP", (short)0x000e),
 	EXIF_MAKERNOTE("ExifMakernote", (short)0x000f),
 	
-	
 	UNKNOWN("Unknown", (short)0x0000);
 	
 	private FieldType(String name, short value) {
