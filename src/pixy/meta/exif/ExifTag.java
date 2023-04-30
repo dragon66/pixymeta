@@ -56,6 +56,10 @@ public enum ExifTag implements Tag {
 	DATE_TIME_ORIGINAL("DateTimeOriginal", (short)0x9003),
 	DATE_TIME_DIGITIZED("DateTimeDigitized", (short)0x9004),
 	
+	OFFSET_TIME("Offset Time", (short)0x9010),
+	OFFSET_TIME_ORIGINAL("Offset Time Original", (short)0x9011),
+	OFFSET_TIME_DIGITIZED("Offset Time Digitized", (short)0x9012),
+
 	COMPONENT_CONFIGURATION("ComponentConfiguration", (short)0x9101),
 	COMPRESSED_BITS_PER_PIXEL("CompressedBitsPerPixel", (short)0x9102),
 	
