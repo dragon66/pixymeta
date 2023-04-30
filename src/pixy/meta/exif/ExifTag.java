@@ -44,6 +44,10 @@ public enum ExifTag implements Tag {
 	ISO_SPEED_RATINGS("ISOSpeedRatings", (short)0x8827),
 	OECF("OECF", (short)0x8828),
 	
+	SENSITIVITY_TYPE("Sensitivity Type", (short)0x8830),
+	STANDARD_OUTPUT_SENSITIVITY("Standard Output Sensitivity", (short)0x8831),	
+	RECOMMENDED_EXPOSURE_INDEX("Recommended Exposure Index", (short)0x8832),	
+	
 	EXIF_VERSION("ExifVersion", (short)0x9000) {
 		public String getFieldAsString(Object value) {
 			return new String((byte[])value).trim();
