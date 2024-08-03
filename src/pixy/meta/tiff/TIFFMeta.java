@@ -664,8 +664,9 @@ public class TIFFMeta {
 		}
 		
 		workingPage.addField(new ASCIIField(TiffTag.IMAGE_DESCRIPTION.getValue(), commentsBuilder.toString()));
-		
-		offset = copyPages(ifds, offset, rin, rout);
+  		
+                int writeOffset = FIRST_WRITE_OFFSET;
+                writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
@@ -774,7 +775,8 @@ public class TIFFMeta {
 		IFD workingPage = ifds.get(pageNumber);
 		workingPage.addField(new UndefinedField(TiffTag.ICC_PROFILE.getValue(), icc_profile));
 		
-		offset = copyPages(ifds, offset, rin, rout);
+                int writeOffset = FIRST_WRITE_OFFSET;
+		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
@@ -812,7 +814,7 @@ public class TIFFMeta {
 		List<IFD> ifds = new ArrayList<IFD>();
 		readIFDs(null, null, TiffTag.class, ifds, offset, rin);
 		
-		if(pageNumber < 0 || pageNumber >= ifds.size())
+		if(pageNumber < 0 || pageNumber >= ifds.size())u
 			throw new IllegalArgumentException("pageNumber " + pageNumber + " out of bounds: 0 - " + (ifds.size() - 1));
 		
 		IFD workingPage = ifds.get(pageNumber);
@@ -869,7 +871,8 @@ public class TIFFMeta {
 		// Add IPTC to regular IPTC tag field
 		workingPage.addField(new UndefinedField(TiffTag.IPTC.getValue(), bout.toByteArray()));
 		
-		offset = copyPages(ifds, offset, rin, rout);
+                int writeOffset = FIRST_WRITE_OFFSET;
+		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
@@ -913,7 +916,8 @@ public class TIFFMeta {
 		
 		workingPage.addField(new UndefinedField(TiffTag.PHOTOSHOP.getValue(), bout.toByteArray()));
 		
-		offset = copyPages(ifds, offset, rin, rout);
+                int writeOffset = FIRST_WRITE_OFFSET
+		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
@@ -966,7 +970,8 @@ public class TIFFMeta {
 		IFD workingPage = ifds.get(pageNumber);
 		workingPage.addField(new UndefinedField(TiffTag.XMP.getValue(), xmp));
 		
-		offset = copyPages(ifds, offset, rin, rout);
+                int writeOffset = FIRST_WRITE_OFFSET
+		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);	
