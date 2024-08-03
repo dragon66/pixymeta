@@ -916,7 +916,7 @@ public class TIFFMeta {
 		
 		workingPage.addField(new UndefinedField(TiffTag.PHOTOSHOP.getValue(), bout.toByteArray()));
 		
-                int writeOffset = FIRST_WRITE_OFFSET
+                int writeOffset = FIRST_WRITE_OFFSET;
 		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
@@ -970,7 +970,7 @@ public class TIFFMeta {
 		IFD workingPage = ifds.get(pageNumber);
 		workingPage.addField(new UndefinedField(TiffTag.XMP.getValue(), xmp));
 		
-                int writeOffset = FIRST_WRITE_OFFSET
+                int writeOffset = FIRST_WRITE_OFFSET;
 		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
@@ -1586,8 +1586,9 @@ public class TIFFMeta {
 				default:
 			}
 		}
-		
-		offset = copyPages(ifds, offset, rin, rout);
+
+		int writeOffset = FIRST_WRITE_OFFSET;
+		writeOffset = copyPages(ifds, writeOffset, rin, rout);
 		int firstIFDOffset = ifds.get(0).getStartOffset();	
 
 		writeToStream(rout, firstIFDOffset);
